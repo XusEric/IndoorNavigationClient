@@ -1,11 +1,11 @@
-package com.nav.indoornavigation;
+package com.pos.indoorpositioning;
 
 import java.util.HashMap;
 
 import org.ksoap2.serialization.SoapObject;
 
-import com.nav.indoornavigation.R;
-import com.nav.util.WebServiceHelper;
+import com.pos.indoorpositioning.R;
+import com.pos.util.WebServiceHelper;
 
 import android.os.Bundle;
 import android.os.Handler;

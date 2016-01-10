@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">IndoorNavigation</string>
+    <string name="app_name">室内定位</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="bottom_tab_main">导航</string>
+    <string name="bottom_tab_main">定位</string>
     <string name="bottom_tab_setting">设置</string>
     <string name="bottom_tab_my">我的</string>
 </resources>

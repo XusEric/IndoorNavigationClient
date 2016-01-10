@@ -1,4 +1,4 @@
-package com.nav.util;
+package com.pos.util;
 
 import java.io.IOException;
 import java.io.InputStream;

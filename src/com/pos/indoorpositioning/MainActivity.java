@@ -1,9 +1,9 @@
-package com.nav.indoornavigation;
+package com.pos.indoorpositioning;
 
-import com.nav.indoornavigation.R;
-import com.nav.indoornavigation.MainTab;
-import com.nav.indoornavigation.SettingTab;
-import com.nav.indoornavigation.MeTab;
+import com.pos.indoorpositioning.MainTab;
+import com.pos.indoorpositioning.MeTab;
+import com.pos.indoorpositioning.R;
+import com.pos.indoorpositioning.SettingTab;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -110,10 +110,10 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 	@Override
 	public void onClick(View view) {
 		switch (view.getId()) {
-		case R.id.rl_maintab: // 知道
+		case R.id.rl_maintab: // 定位
 			clickTab1Layout();
 			break;
-		case R.id.rl_setting: // 我想知道
+		case R.id.rl_setting: // 采集
 			clickTab2Layout();
 			break;
 		case R.id.rl_me: // 我的

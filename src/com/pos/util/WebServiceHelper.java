@@ -1,4 +1,4 @@
-package com.nav.util;
+package com.pos.util;
 
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -8,7 +8,7 @@ import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 
-import com.nav.util.ConfigHelper;
+import com.pos.util.ConfigHelper;
 
 /** 
  * 访问Web Service的工具类 
