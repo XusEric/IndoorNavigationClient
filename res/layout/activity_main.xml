@@ -18,7 +18,7 @@
             android:gravity="center_vertical"
             android:orientation="horizontal" 
             android:baselineAligned="true">
-
+			<!-- 定位tab -->
             <RelativeLayout
                 android:id="@+id/rl_maintab"
                 android:layout_width="0dp"
@@ -44,6 +44,61 @@
                     android:textSize="12sp" />
             </RelativeLayout>
 
+			<!-- 采集tab -->
+            <RelativeLayout
+                android:id="@+id/rl_finger"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.0" >
+
+                <ImageView
+                    android:id="@+id/iv_finger"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/btn_my_nor"
+                    android:contentDescription="@null" />
+                
+
+                <TextView
+                    android:id="@+id/tv_finger"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/iv_finger"
+                    android:layout_centerHorizontal="true"
+                    android:text="@string/bottom_tab_finger"
+                    android:textColor="@color/bottomtab_normal"
+                    android:textSize="12sp" />
+            </RelativeLayout>
+            
+            <!-- 时态分割采集tab -->
+            <RelativeLayout
+                android:id="@+id/rl_collect"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.0" >
+
+                <ImageView
+                    android:id="@+id/iv_collect"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/btn_my_nor"
+                    android:contentDescription="@null" />
+                
+
+                <TextView
+                    android:id="@+id/tv_collect"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/iv_collect"
+                    android:layout_centerHorizontal="true"
+                    android:text="@string/bottom_tab_collect"
+                    android:textColor="@color/bottomtab_normal"
+                    android:textSize="12sp" />
+            </RelativeLayout>
+            
+            <!-- 设置tab -->
             <RelativeLayout
                 android:id="@+id/rl_setting"
                 android:layout_width="0dp"
@@ -65,32 +120,6 @@
                     android:layout_below="@+id/iv_setting"
                     android:layout_centerHorizontal="true"
                     android:text="@string/bottom_tab_setting"
-                    android:textColor="@color/bottomtab_normal"
-                    android:textSize="12sp" />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/rl_me"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1.0" >
-
-                <ImageView
-                    android:id="@+id/iv_me"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:src="@drawable/btn_my_nor"
-                    android:contentDescription="@null" />
-                
-
-                <TextView
-                    android:id="@+id/tv_me"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/iv_me"
-                    android:layout_centerHorizontal="true"
-                    android:text="@string/bottom_tab_my"
                     android:textColor="@color/bottomtab_normal"
                     android:textSize="12sp" />
             </RelativeLayout>

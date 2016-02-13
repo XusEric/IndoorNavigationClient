@@ -8,7 +8,7 @@
    <TextView 
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
-	    android:text="这是Tab2的Fragment页"
+	    android:text="这是设置的Fragment页"
 	    android:textSize="18sp"
 	    android:layout_gravity="center"
 	    />

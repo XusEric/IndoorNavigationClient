@@ -32,24 +32,28 @@ public class WebServiceHelper {
   
         SoapObject soap = null;  
         try {  
+        	//实例化SoapObject对象
             SoapObject rpc = new SoapObject(NAMESPACE, METHOD_NAME);  
             if (params != null && params.size() > 0) {  
                 for (Entry<String, Object> item : params.entrySet()) {  
                     rpc.addProperty(item.getKey(), item.getValue().toString());  
                 }  
             }  
-  
+            //使用SOAP1.1协议创建Envelop对象
             SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);  
             envelope.bodyOut = rpc;  
-            envelope.dotNet = false;// true--net; false--java;  
+            // true--net; false--java;  
+            envelope.dotNet = false;
             envelope.setOutputSoapObject(rpc);  
-  
+            //创建HttpTransportSE传输对象
             HttpTransportSE ht = new HttpTransportSE(URL);  
             ht.debug = true;  
             ht.call(SOAP_ACTION, envelope);  
             try {  
+            	//如果服务器返回的是String类型
                 soap = (SoapObject) envelope.getResponse();  
             } catch (Exception e) {  
+            	//如果服务器返回的是byte[]类型
                 soap = (SoapObject) envelope.bodyIn;  
             }  
         } catch (Exception ex) {  

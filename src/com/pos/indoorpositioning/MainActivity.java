@@ -1,7 +1,9 @@
 package com.pos.indoorpositioning;
 
+import com.baidu.mapapi.SDKInitializer;
+import com.baidu.mapapi.map.SupportMapFragment;
 import com.pos.indoorpositioning.MainTab;
-import com.pos.indoorpositioning.MeTab;
+import com.pos.indoorpositioning.CollectTab;
 import com.pos.indoorpositioning.R;
 import com.pos.indoorpositioning.SettingTab;
 
@@ -21,19 +23,20 @@ import android.widget.Toast;
 
 public class MainActivity extends FragmentActivity implements OnClickListener {
 	// 三个tab布局
-	private RelativeLayout mainLayout, settingLayout, meLayout;
+	private RelativeLayout mainLayout, settingLayout, collectLayout, fingerLayout;
 
 	// 底部标签切换的Fragment
-	private Fragment mainFragment, settingFragment, meFragment,
+	private Fragment mainFragment, settingFragment, collectFragment, fingerFragment,
 			currentFragment;
 	// 底部标签图片
-	private ImageView mainImg, settingImg, meImg;
+	private ImageView mainImg, settingImg, collectImg, fingerImg;
 	// 底部标签的文本
-	private TextView mainTv, settingTv, meTv;
+	private TextView mainTv, settingTv, collectTv, fingerTv;
 		
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+		super.onCreate(savedInstanceState); 
+		SDKInitializer.initialize(getApplicationContext());  
 		setContentView(R.layout.activity_main);
 		if (savedInstanceState == null) {
             // We were just launched 
@@ -64,17 +67,21 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 	private void initUI() {
 		mainLayout = (RelativeLayout) findViewById(R.id.rl_maintab);
 		settingLayout = (RelativeLayout) findViewById(R.id.rl_setting);
-		meLayout = (RelativeLayout) findViewById(R.id.rl_me);
+		collectLayout = (RelativeLayout) findViewById(R.id.rl_collect);
+		fingerLayout = (RelativeLayout) findViewById(R.id.rl_finger);
 		mainLayout.setOnClickListener(this);
 		settingLayout.setOnClickListener(this);
-		meLayout.setOnClickListener(this);
+		collectLayout.setOnClickListener(this);
+		fingerLayout.setOnClickListener(this);
 
 		mainImg = (ImageView) findViewById(R.id.iv_maintab);
 		settingImg = (ImageView) findViewById(R.id.iv_setting);
-		meImg = (ImageView) findViewById(R.id.iv_me);
+		collectImg = (ImageView) findViewById(R.id.iv_collect);
+		fingerImg = (ImageView) findViewById(R.id.iv_finger);
 		mainTv = (TextView) findViewById(R.id.tv_maintab);
 		settingTv = (TextView) findViewById(R.id.tv_setting);
-		meTv = (TextView) findViewById(R.id.tv_me);
+		collectTv = (TextView) findViewById(R.id.tv_collect);
+		fingerTv = (TextView) findViewById(R.id.tv_finger);
 
 	}
 
@@ -100,8 +107,8 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 			settingImg.setImageResource(R.drawable.btn_wantknow_nor);
 			settingTv.setTextColor(getResources().getColor(
 					R.color.bottomtab_normal));
-			meImg.setImageResource(R.drawable.btn_my_nor);
-			meTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
+			collectImg.setImageResource(R.drawable.btn_my_nor);
+			collectTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
 
 		}
 
@@ -113,11 +120,14 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 		case R.id.rl_maintab: // 定位
 			clickTab1Layout();
 			break;
-		case R.id.rl_setting: // 采集
+		case R.id.rl_finger: // 指纹采集
 			clickTab2Layout();
 			break;
-		case R.id.rl_me: // 我的
+		case R.id.rl_collect: // Rssi收集
 			clickTab3Layout();
+			break;
+		case R.id.rl_setting: // 系统设置
+			clickTab4Layout();
 			break;
 		default:
 			break;
@@ -125,7 +135,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 	}
 	
 	/**
-	 * 点击第一个tab
+	 * 点击第一个tab，室内定位主页
 	 */
 	private void clickTab1Layout() {
 		if (mainFragment == null) {
@@ -139,14 +149,58 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 		settingImg.setImageResource(R.drawable.btn_wantknow_nor);
 		settingTv.setTextColor(getResources().getColor(
 				R.color.bottomtab_normal));
-		meImg.setImageResource(R.drawable.btn_my_nor);
-		meTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
+		collectImg.setImageResource(R.drawable.btn_my_nor);
+		collectTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
+		fingerImg.setImageResource(R.drawable.btn_my_nor);
+		fingerTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
+	}
+
+	/**
+	 * 点击第二个tab，指纹采集主页
+	 */
+	public void clickTab2Layout() {
+		if (fingerFragment == null) {
+			fingerFragment = new FingerTab();
+		}
+		
+		addOrShowFragment(getSupportFragmentManager().beginTransaction(), fingerFragment);
+		mainImg.setImageResource(R.drawable.btn_know_nor);
+		mainTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
+		settingImg.setImageResource(R.drawable.btn_wantknow_nor);
+		settingTv.setTextColor(getResources().getColor(
+				R.color.bottomtab_normal));
+		collectImg.setImageResource(R.drawable.btn_my_nor);
+		collectTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
+		fingerImg.setImageResource(R.drawable.btn_my_pre);
+		fingerTv.setTextColor(getResources().getColor(R.color.bottomtab_press));
 	}
 	
 	/**
-	 * 点击第二个tab
+	 * 点击第三个tab，RSSI收集主页
 	 */
-	private void clickTab2Layout() {
+	private void clickTab3Layout() {
+		if (collectFragment == null) {
+			collectFragment = new CollectTab();
+		}
+		
+		addOrShowFragment(getSupportFragmentManager().beginTransaction(), collectFragment);
+		mainImg.setImageResource(R.drawable.btn_know_nor);
+		mainTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
+		settingImg.setImageResource(R.drawable.btn_wantknow_nor);
+		settingTv.setTextColor(getResources().getColor(
+				R.color.bottomtab_normal));
+		collectImg.setImageResource(R.drawable.btn_my_pre);
+		collectTv.setTextColor(getResources().getColor(R.color.bottomtab_press));
+		fingerImg.setImageResource(R.drawable.btn_my_nor);
+		fingerTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
+		
+	}
+
+
+	/**
+	 * 点击第四个tab，系统设置主页
+	 */
+	private void clickTab4Layout() {
 		if (settingFragment == null) {
 			settingFragment = new SettingTab();
 		}
@@ -157,28 +211,11 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 		settingImg.setImageResource(R.drawable.btn_wantknow_pre);
 		settingTv.setTextColor(getResources().getColor(
 				R.color.bottomtab_press));
-		meImg.setImageResource(R.drawable.btn_my_nor);
-		meTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
+		collectImg.setImageResource(R.drawable.btn_my_nor);
+		collectTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
+		fingerImg.setImageResource(R.drawable.btn_my_nor);
+		fingerTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
 
-	}
-
-	/**
-	 * 点击第三个tab
-	 */
-	private void clickTab3Layout() {
-		if (meFragment == null) {
-			meFragment = new MeTab();
-		}
-		
-		addOrShowFragment(getSupportFragmentManager().beginTransaction(), meFragment);
-		mainImg.setImageResource(R.drawable.btn_know_nor);
-		mainTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
-		settingImg.setImageResource(R.drawable.btn_wantknow_nor);
-		settingTv.setTextColor(getResources().getColor(
-				R.color.bottomtab_normal));
-		meImg.setImageResource(R.drawable.btn_my_pre);
-		meTv.setTextColor(getResources().getColor(R.color.bottomtab_press));
-		
 	}
 
 	/**
@@ -193,10 +230,10 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 			return;
 
 		if (!fragment.isAdded()) { // 如果当前fragment未被添加，则添加到Fragment管理器中
-			transaction.hide(currentFragment)
+			transaction.remove(currentFragment)
 					.add(R.id.content_layout, fragment).commit();
 		} else {
-			transaction.hide(currentFragment).show(fragment).commit();
+			transaction.remove(currentFragment).show(fragment).commit();
 		}
 
 		currentFragment = fragment;
@@ -266,6 +303,6 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
            this.finish();  
         }  
         super.onBackPressed();  
-    }  
+    }
     
 }
