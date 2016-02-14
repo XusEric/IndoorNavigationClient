@@ -47,6 +47,7 @@ public class MainTab extends Fragment{
 				false); 
         //获取地图控件引用  
         mMapView = (MapView) view.findViewById(R.id.bmapView); 
+        mMapView.showScaleControl(false);// 不显示默认比例尺控件
         BaiduMap mBaiduMap=mMapView.getMap();  
         //空白地图, 基础地图瓦片将不会被渲染。在地图类型中设置为NONE，将不会使用流量下载基础地图瓦片图层。使用场景：与瓦片图层一起使用，节省流量，提升自定义瓦片图下载速度。
         mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NONE);
