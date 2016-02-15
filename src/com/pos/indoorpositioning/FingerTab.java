@@ -19,6 +19,9 @@ import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.Overlay;
+import com.baidu.mapapi.map.OverlayOptions;
+import com.baidu.mapapi.map.PolygonOptions;
+import com.baidu.mapapi.map.Stroke;
 import com.baidu.mapapi.map.SupportMapFragment;
 import com.baidu.mapapi.model.LatLng;
 import com.pos.rssi.kmeans;
@@ -97,15 +100,15 @@ public class FingerTab  extends Fragment{
 		buttonStart.setOnClickListener(new OnClickListener() {  
             @Override  
             public void onClick(View v) {  
-            startDate    =   new    Date(System.currentTimeMillis());//获取当前时间  
-            flag=true;
-
-    		//获取Wi-Fi Manager对象
-    		wifiManager= (WifiManager)getActivity(). getSystemService(getContext().WIFI_SERVICE);
-    		
-            DoCollect ds1 = new DoCollect("");
-            Thread t1 = new Thread(ds1);
-            t1.start();
+	            startDate    =   new    Date(System.currentTimeMillis());//获取当前时间  
+	            flag=true;
+	
+	    		//获取Wi-Fi Manager对象
+	    		wifiManager= (WifiManager)getActivity(). getSystemService(getContext().WIFI_SERVICE);
+	    		
+	            DoCollect ds1 = new DoCollect("");
+	            Thread t1 = new Thread(ds1);
+	            t1.start();
             }  
         }); 
 		//重置
@@ -214,19 +217,78 @@ public class FingerTab  extends Fragment{
 	        	
             }  
         }); 
-		
         //获取地图控件引用  
-        mMapView = (MapView)view.findViewById(R.id.bmapViewfinger); 
+//        mMapView = (MapView)view.findViewById(R.id.bmapViewfinger); 
+//        mBaiduMap=mMapView.getMap();  
+//        //空白地图, 基础地图瓦片将不会被渲染。在地图类型中设置为NONE，将不会使用流量下载基础地图瓦片图层。使用场景：与瓦片图层一起使用，节省流量，提升自定义瓦片图下载速度。
+//        mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NONE);
+//        // 删除百度地图LoGo 
+//        //mMapView.removeViewAt(1);  
+//        mMapView.showScaleControl(false);// 不显示默认比例尺控件
+        // 设置marker图标 
+//        bitmap = BitmapDescriptorFactory.fromResource(R.drawable.btn_wantknow_pre); 
+        
+        
+        //*********打开数据库相关**********
+        // 创建了一个DatabaseHelper对象 
+        DataBaseHelper dbHelper = new DataBaseHelper(this.getContext(),"MyWifiCollect",null,1);  
+        // 创建或打开一个连接  
+        sqliteDatabase = dbHelper.getWritableDatabase(); 
+        
+
+		InitMap(view);
+		return view;
+	}
+
+
+	public void InitMap(View view ){
+		//获取地图控件引用  
+        mMapView = (MapView) view.findViewById(R.id.bmapViewfinger); 
+        mMapView.showScaleControl(false);// 不显示默认比例尺控件
         mBaiduMap=mMapView.getMap();  
         //空白地图, 基础地图瓦片将不会被渲染。在地图类型中设置为NONE，将不会使用流量下载基础地图瓦片图层。使用场景：与瓦片图层一起使用，节省流量，提升自定义瓦片图下载速度。
         mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NONE);
-        // 删除百度地图LoGo 
-        //mMapView.removeViewAt(1);  
-        mMapView.showScaleControl(false);// 不显示默认比例尺控件
-        // 设置marker图标 
-//        bitmap = BitmapDescriptorFactory.fromResource(R.drawable.btn_wantknow_pre); 
+        //获取地图数据
+    	Cursor cursor = sqliteDatabase.rawQuery("select * from Map where Floor=? ", new String[]{"1"});
+    	cursor.moveToFirst(); 
+        String polygon= cursor.getString(cursor.getColumnIndex("Polygon"));
+        String[] pts=polygon.split(";");
+        int color=0xFFFFFF00;
+        String Title="";
+        for(int i=0;i<pts.length&&pts[i]!="";i++){
+        	List<LatLng> ptall = new ArrayList<LatLng>();
+        	String[] all=pts[i].split(":");
+        	String[] pt=all[0].split("\\|");//多边形坐标
+        	String[] attr=all[1].split("\\|");//多边形属性,颜色|中心
+        	switch(Integer.parseInt(attr[0])){
+        	case 1:
+        		color=0xAAFFFF00;
+        		Title="服装";
+        	}
+        	for(int j=0;j<pt.length&&pt[j]!="";j++){
+        		LatLng latlng = new LatLng(Double.parseDouble(pt[j].split(",")[0]), Double.parseDouble(pt[j].split(",")[1]));
+        		ptall.add(latlng);
+        	}
+        	//构建用户绘制多边形的Option对象  
+            OverlayOptions polygonOption = new PolygonOptions()  
+                .points(ptall)  
+                .stroke(new Stroke(5, 0xAA00FF00))  
+                .fillColor(color);  
+            //在地图上添加多边形Option，用于显示  
+            mBaiduMap.addOverlay(polygonOption);
+            //添加标题、说明
+            BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.drawable.btn_wantknow_pre); 
+            LatLng point = new LatLng(Double.parseDouble(attr[1].split(",")[0]), Double.parseDouble(attr[1].split(",")[1])); 
+	          MarkerOptions options = new MarkerOptions().position(point) 
+	          .icon(bitmap)
+	          .title(Title)
+	          .zIndex(9)  //设置marker所在层级
+	          .draggable(true);  //设置手势拖拽
+	        mBaiduMap.addOverlay(options);
+        } 
+        
         mBaiduMap.setOnMapClickListener(new OnMapClickListener() { 
-   
+        	   
             //点击地图监听 
             @Override 
             public void onMapClick(LatLng latLng) { 
@@ -265,14 +327,8 @@ public class FingerTab  extends Fragment{
 			} 
         });  
         
-        //*********打开数据库相关**********
-        // 创建了一个DatabaseHelper对象 
-        DataBaseHelper dbHelper = new DataBaseHelper(this.getContext(),"MyWifiCollect",null,1);  
-        // 创建或打开一个连接  
-        sqliteDatabase = dbHelper.getWritableDatabase(); 
-		return view;
 	}
-
+	
     @Override
 	public void onDestroy() {  
         super.onDestroy();  
@@ -319,7 +375,7 @@ public class FingerTab  extends Fragment{
 	    	}
 	    }
 	}
-    
+    //指纹采集+高斯加权滤波
     private void CollectFinger(){
     	Date    curDate    =   new    Date(System.currentTimeMillis());//获取当前时间  
     	long diff = curDate.getTime() - startDate.getTime();//这样得到的差值是微秒级别 

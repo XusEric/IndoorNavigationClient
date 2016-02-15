@@ -32,6 +32,16 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         db.execSQL(sql);
         sql = "CREATE TABLE FingerIndex (ID INTEGER primary key autoincrement,IndexNum int,FPId int)";
         db.execSQL(sql);
+        sql = "CREATE TABLE Map (ID INTEGER primary key autoincrement,Floor nvarchar(10),Polygon text)";
+        db.execSQL(sql);
+        sql = "CREATE TABLE FingerMap (ID INTEGER primary key autoincrement,FPId int,MapId int)";
+        db.execSQL(sql);
+        sql = "CREATE TABLE Time (ID INTEGER primary key autoincrement,Week int,Time time,Range int)";
+        db.execSQL(sql);
+        sql = "CREATE TABLE TimeIndex (ID INTEGER primary key autoincrement,TenseId int,IndexNum int)";
+        db.execSQL(sql);
+        sql = "CREATE TABLE CollectWifi (ID INTEGER primary key autoincrement,SSID nvarchar(50),MAC nvarchar(20),LinkSpeed nvarchar(10),Rssi int,CreateTime datetime)";
+        db.execSQL(sql);
 	}
 
 	@Override
