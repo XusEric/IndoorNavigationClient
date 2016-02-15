@@ -16,6 +16,8 @@ import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.DotOptions;
 import com.baidu.mapapi.map.MapPoi;
+import com.baidu.mapapi.map.MapStatusUpdate;
+import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.Overlay;
@@ -248,6 +250,10 @@ public class FingerTab  extends Fragment{
         mBaiduMap=mMapView.getMap();  
         //空白地图, 基础地图瓦片将不会被渲染。在地图类型中设置为NONE，将不会使用流量下载基础地图瓦片图层。使用场景：与瓦片图层一起使用，节省流量，提升自定义瓦片图下载速度。
         mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NONE);
+        //设置缩放级别
+        float zoomLevel = 3;
+        MapStatusUpdate u = MapStatusUpdateFactory.zoomTo(zoomLevel);
+        mBaiduMap.animateMapStatus(u);
         //获取地图数据
     	Cursor cursor = sqliteDatabase.rawQuery("select * from Map where Floor=? ", new String[]{"1"});
     	cursor.moveToFirst(); 
@@ -262,7 +268,7 @@ public class FingerTab  extends Fragment{
         	String[] attr=all[1].split("\\|");//多边形属性,颜色|中心
         	switch(Integer.parseInt(attr[0])){
         	case 1:
-        		color=0xAAFFFF00;
+        		color=0xAAE5F2FF;
         		Title="服装";
         	}
         	for(int j=0;j<pt.length&&pt[j]!="";j++){
@@ -272,12 +278,12 @@ public class FingerTab  extends Fragment{
         	//构建用户绘制多边形的Option对象  
             OverlayOptions polygonOption = new PolygonOptions()  
                 .points(ptall)  
-                .stroke(new Stroke(5, 0xAA00FF00))  
+                .stroke(new Stroke(5, 0xAAd9d9d9))  
                 .fillColor(color);  
             //在地图上添加多边形Option，用于显示  
             mBaiduMap.addOverlay(polygonOption);
             //添加标题、说明
-            BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.drawable.btn_wantknow_pre); 
+            BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.drawable.cart); 
             LatLng point = new LatLng(Double.parseDouble(attr[1].split(",")[0]), Double.parseDouble(attr[1].split(",")[1])); 
 	          MarkerOptions options = new MarkerOptions().position(point) 
 	          .icon(bitmap)
@@ -459,6 +465,7 @@ public class FingerTab  extends Fragment{
                 case 1:
                 	Toast.makeText(getContext(),"采集完毕 ",Toast.LENGTH_SHORT).show();
                 	flag=false;
+                	isNew=true;//采集完毕自动新增一个点
                     break;
                 default:
                     break;

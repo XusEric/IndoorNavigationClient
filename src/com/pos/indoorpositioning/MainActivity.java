@@ -101,14 +101,16 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 			// 记录当前Fragment
 			currentFragment = mainFragment;
 			// 设置图片文本的变化
-			mainImg.setImageResource(R.drawable.btn_know_pre);
+			mainImg.setImageResource(R.drawable.btn_location_pre);
 			mainTv.setTextColor(getResources()
 					.getColor(R.color.bottomtab_press));
-			settingImg.setImageResource(R.drawable.btn_wantknow_nor);
+			settingImg.setImageResource(R.drawable.btn_setting_nor);
 			settingTv.setTextColor(getResources().getColor(
 					R.color.bottomtab_normal));
-			collectImg.setImageResource(R.drawable.btn_my_nor);
+			collectImg.setImageResource(R.drawable.btn_collect_nor);
 			collectTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
+			fingerImg.setImageResource(R.drawable.btn_finger_nor);
+			fingerTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
 
 		}
 
@@ -144,14 +146,14 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 		addOrShowFragment(getSupportFragmentManager().beginTransaction(), mainFragment);
 		
 		// 设置底部tab变化
-		mainImg.setImageResource(R.drawable.btn_know_pre);
+		mainImg.setImageResource(R.drawable.btn_location_pre);
 		mainTv.setTextColor(getResources().getColor(R.color.bottomtab_press));
-		settingImg.setImageResource(R.drawable.btn_wantknow_nor);
+		settingImg.setImageResource(R.drawable.btn_setting_nor);
 		settingTv.setTextColor(getResources().getColor(
 				R.color.bottomtab_normal));
-		collectImg.setImageResource(R.drawable.btn_my_nor);
+		collectImg.setImageResource(R.drawable.btn_collect_nor);
 		collectTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
-		fingerImg.setImageResource(R.drawable.btn_my_nor);
+		fingerImg.setImageResource(R.drawable.btn_finger_nor);
 		fingerTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
 	}
 
@@ -164,14 +166,14 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 		}
 		
 		addOrShowFragment(getSupportFragmentManager().beginTransaction(), fingerFragment);
-		mainImg.setImageResource(R.drawable.btn_know_nor);
+		mainImg.setImageResource(R.drawable.btn_location_nor);
 		mainTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
-		settingImg.setImageResource(R.drawable.btn_wantknow_nor);
+		settingImg.setImageResource(R.drawable.btn_setting_nor);
 		settingTv.setTextColor(getResources().getColor(
 				R.color.bottomtab_normal));
-		collectImg.setImageResource(R.drawable.btn_my_nor);
+		collectImg.setImageResource(R.drawable.btn_collect_nor);
 		collectTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
-		fingerImg.setImageResource(R.drawable.btn_my_pre);
+		fingerImg.setImageResource(R.drawable.btn_finger_pre);
 		fingerTv.setTextColor(getResources().getColor(R.color.bottomtab_press));
 	}
 	
@@ -184,14 +186,14 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 		}
 		
 		addOrShowFragment(getSupportFragmentManager().beginTransaction(), collectFragment);
-		mainImg.setImageResource(R.drawable.btn_know_nor);
+		mainImg.setImageResource(R.drawable.btn_location_nor);
 		mainTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
-		settingImg.setImageResource(R.drawable.btn_wantknow_nor);
+		settingImg.setImageResource(R.drawable.btn_setting_nor);
 		settingTv.setTextColor(getResources().getColor(
 				R.color.bottomtab_normal));
-		collectImg.setImageResource(R.drawable.btn_my_pre);
+		collectImg.setImageResource(R.drawable.btn_collect_pre);
 		collectTv.setTextColor(getResources().getColor(R.color.bottomtab_press));
-		fingerImg.setImageResource(R.drawable.btn_my_nor);
+		fingerImg.setImageResource(R.drawable.btn_finger_nor);
 		fingerTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
 		
 	}
@@ -206,14 +208,14 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 		}
 		addOrShowFragment(getSupportFragmentManager().beginTransaction(), settingFragment);
 		
-		mainImg.setImageResource(R.drawable.btn_know_nor);
+		mainImg.setImageResource(R.drawable.btn_location_nor);
 		mainTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
-		settingImg.setImageResource(R.drawable.btn_wantknow_pre);
+		settingImg.setImageResource(R.drawable.btn_setting_pre);
 		settingTv.setTextColor(getResources().getColor(
 				R.color.bottomtab_press));
-		collectImg.setImageResource(R.drawable.btn_my_nor);
+		collectImg.setImageResource(R.drawable.btn_collect_nor);
 		collectTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
-		fingerImg.setImageResource(R.drawable.btn_my_nor);
+		fingerImg.setImageResource(R.drawable.btn_finger_nor);
 		fingerTv.setTextColor(getResources().getColor(R.color.bottomtab_normal));
 
 	}
