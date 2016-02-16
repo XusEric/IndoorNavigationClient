@@ -60,18 +60,18 @@ public class gaussionmodel {
 		
 	}
 	//求高斯滤波后的值
-//	3σ(西格玛)原则为
-//	数值分布在（μ-σ,μ+σ)中的概率为0.6826
-//	数值分布在（μ-2σ,μ+2σ)中的概率为0.9544
-//	数值分布在（μ-3σ,μ+3σ)中的概率为0.9974
+	//	3σ(西格玛)原则为
+	//	数值分布在（μ-σ,μ+σ)中的概率为0.6826
+	//	数值分布在（μ-2σ,μ+2σ)中的概率为0.9544
+	//	数值分布在（μ-3σ,μ+3σ)中的概率为0.9974
 	public double GaussionFilter(){
 		double result=0.00;
 		double standardDeviation=Math.sqrt(Variance());//标准差
 		double average=Average();//平均值
 
-		List<Double> oneSigema = new ArrayList<Double>();
-		List<Double> twoSigema = new ArrayList<Double>();
-		List<Double> threeSigema = new ArrayList<Double>();
+		List<Double> oneSigema = new ArrayList<Double>();//68.26%
+		List<Double> twoSigema = new ArrayList<Double>();//27.18%
+		List<Double> threeSigema = new ArrayList<Double>();//4.3%
 		double min = average-standardDeviation;//u-o
 		double max = average+standardDeviation;//u+o
 		for(int i=0;i<data.length;i++){
@@ -99,16 +99,13 @@ public class gaussionmodel {
 		double totalOne=0.00;
 		double totalTwo=0.00;
 		double totalThree=0.00;
-		for(Double tmp:oneSigema)  
-        {  
+		for(Double tmp:oneSigema){  
 			totalOne+= tmp;
         } 
-		for(Double tmp:twoSigema)  
-        {  
+		for(Double tmp:twoSigema){  
 			totalTwo+= tmp;
         } 
-		for(Double tmp:threeSigema)  
-        {  
+		for(Double tmp:threeSigema){  
 			totalThree+= tmp;
         } 
 		double basic=0.00;

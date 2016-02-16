@@ -87,11 +87,11 @@ public class kwnn {
             		"",currData.getX(),currData.getY());  
             pq.add(node);  
         }  
-        System.out.println();
-        System.out.println("-----before-----");
-    	for (kwnnmodel x : pq) {
-    		 System.out.println(x.getIndex()+" "+x.getDistance()); 
-        } 
+//        System.out.println();
+//        System.out.println("-----before-----");
+//    	for (kwnnmodel x : pq) {
+//    		 System.out.println(x.getIndex()+" "+x.getDistance()); 
+//        } 
         for (int i = 0; i < datas.size(); i++) {  
             fingermodel t = datas.get(i);  
             double distance = calDistance(testData, t);  
@@ -118,22 +118,22 @@ public class kwnn {
     /** 
      * 获取所得到的k个最近邻元组的加权和，并算出位置点
      * @param pq 存储k个最近近邻元组的优先级队列 
-     * @return 多数类的名称 
+     * @return 坐标点
      */  
     private String getWeight(PriorityQueue<kwnnmodel> pq) {
     	double total=0.00;
-    	System.out.println();
-        System.out.println("-----after-----");
+//    	System.out.println();
+//        System.out.println("-----after-----");
         //如果仅对值做加法，使用遍历value的方式，如下
 //        for (String value : map.values()) { 
 //        }
         //离待测点越近，权重越大，与距离成反比
     	for (kwnnmodel x : pq) {
     		total+=1/x.getDistance();
-    		System.out.print(x.getIndex()+" "+x.getDistance()+"--X:"+x.getX()+" Y:"+x.getY()); 
-    		System.out.println(); 
+//    		System.out.print(x.getIndex()+" "+x.getDistance()+"--X:"+x.getX()+" Y:"+x.getY()); 
+//    		System.out.println(); 
         }
-        System.out.println("-----分配后-----");
+//        System.out.println("-----分配后-----");
         double dx=0.00;
         double dy=0.00;
     	for (kwnnmodel x : pq) {
@@ -142,10 +142,10 @@ public class kwnn {
     		x.setY(x.getY()*w);
     		dx+=x.getX();
     		dy+=x.getY();
-    		System.out.print(x.getIndex()+" "+x.getDistance()+"--X:"+x.getX()+" Y:"+x.getY()+" 权重："+w); 
-    		System.out.println(); 
+//    		System.out.print(x.getIndex()+" "+x.getDistance()+"--X:"+x.getX()+" Y:"+x.getY()+" 权重："+w); 
+//    		System.out.println(); 
         }
-    	System.out.println(" X:"+dx+" Y:"+dy);
+//    	System.out.println(" X:"+dx+" Y:"+dy);
     	return dx+","+dy;
     }
 }

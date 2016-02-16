@@ -2,7 +2,7 @@ package com.pos.rssi;
 
 public class kmeansmodel {
 	public int k=2;//簇的数目，即中心点数量
-	public double[][] data;
+	public double[][] data;//指纹点
 	public int dim;//维数，一个坐标点对应dim个AP
 	public int[] labels;//所属聚类标号(0~k-1)
 	public double[][] centers;//k个聚类中心点的坐标,，第i(0~k-1)个中心点为centers[i]

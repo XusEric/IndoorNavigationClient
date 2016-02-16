@@ -17,6 +17,7 @@ import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MarkerOptions;
+import com.baidu.mapapi.map.MarkerOptions.MarkerAnimateType;
 import com.baidu.mapapi.map.Overlay;
 import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.PolygonOptions;
@@ -200,6 +201,7 @@ public class MainTab extends Fragment{
 	    		//第一步，查找最近索引值
 	            //获取索引表
             	Cursor cursor = sqliteDatabase.rawQuery("select * from MainIndex ", new String[0]);
+            	//索引目录
 		        Map<Integer,Map<String, Double>> indexData=new HashMap<Integer,Map<String, Double>>();
 		        while (cursor.moveToNext()) {  
 		        	int key = cursor.getInt(cursor.getColumnIndex("IndexNum"));
@@ -265,15 +267,19 @@ public class MainTab extends Fragment{
 		        double latitude=Double.parseDouble(result.split(",")[0]);
 		        double longitude=Double.parseDouble(result.split(",")[1]);
                 LatLng point = new LatLng(latitude, longitude); 
-                DotOptions op=new  DotOptions().center(point) 
-                        .color(0XFFfaa755)
-                        .radius(25)
-                        .zIndex(9);  //设置marker所在层级
-                
+//                DotOptions op=new  DotOptions().center(point) 
+//                        .color(0XFFfaa755)
+//                        .radius(25)
+//                        .zIndex(9);  //设置marker所在层级
+                BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.drawable.dingwei1); 
+                MarkerOptions options = new MarkerOptions().position(point) 
+          	          .icon(bitmap)
+          	          .title("test")
+          	          .zIndex(9);  //设置marker所在层级
                 if(myOverlay!=null){
                 	myOverlay.remove();
                 }
-                myOverlay=mBaiduMap.addOverlay(op); 
+                myOverlay=mBaiduMap.addOverlay(options); 
 		        
 		    	msg.what = 1;
 		    	//定义参数对象
@@ -283,7 +289,7 @@ public class MainTab extends Fragment{
 //		        //服务调用
 //		        SoapObject a= WebServiceHelper.getSoapObject("BasicData", "getUserList", null, paramsMap);
 //		        System.out.println("result:"+a.toString());
-		        msg.obj="";
+		        msg.obj=result;
 	            handler.sendMessage(msg);
 	    	}
 	    	catch(Exception e)

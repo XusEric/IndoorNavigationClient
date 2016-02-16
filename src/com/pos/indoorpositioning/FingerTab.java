@@ -25,6 +25,7 @@ import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.PolygonOptions;
 import com.baidu.mapapi.map.Stroke;
 import com.baidu.mapapi.map.SupportMapFragment;
+import com.baidu.mapapi.map.TextOptions;
 import com.baidu.mapapi.model.LatLng;
 import com.pos.rssi.kmeans;
 import com.pos.rssi.kmeansmodel;
@@ -149,8 +150,8 @@ public class FingerTab  extends Fragment{
             	cursor = sqliteDatabase.query("FingerData", new String[] { "ID","MAC",  
                       "Lat","Lng","Rssi" }, null, null, null, null, "Lat,Lng");  
             	double oldLat,oldLng;
-            	Map<String, Map<String,Integer>> clusterList = new HashMap<String, Map<String,Integer>>();
 		        // 将光标移动到下一行，从而判断该结果集是否还有下一条数据，如果有则返回true，没有则返回false 
+            	Map<String, Map<String,Integer>> clusterList = new HashMap<String, Map<String,Integer>>();
             	//按照指纹点分开存储
 		        while (cursor.moveToNext()) {  
 		        	FingerDataModel fdm=new FingerDataModel();
@@ -159,7 +160,6 @@ public class FingerTab  extends Fragment{
 		            fdm.Lat = cursor.getDouble(cursor.getColumnIndex("Lat"));  
 		            fdm.Lng = cursor.getDouble(cursor.getColumnIndex("Lng"));  
 		            fdm.Rssi = cursor.getInt(cursor.getColumnIndex("Rssi"));  
-//		            allData.add(fdm);
 		            String key=Double.toString(fdm.Lat)+","+Double.toString(fdm.Lng);
 		            if(!clusterList.containsKey(key)){
 		            	Map<String,Integer> list = new HashMap<String,Integer>();
@@ -237,8 +237,11 @@ public class FingerTab  extends Fragment{
         // 创建或打开一个连接  
         sqliteDatabase = dbHelper.getWritableDatabase(); 
         
-
-		InitMap(view);
+        //初始化地图线程
+        DoDrawMap ds2 = new DoDrawMap(view);
+        Thread t2 = new Thread(ds2);
+        t2.start();
+		//InitMap(view);
 		return view;
 	}
 
@@ -316,11 +319,6 @@ public class FingerTab  extends Fragment{
                         .color(0XFFfaa755)
                         .radius(25)
                         .zIndex(9);  //设置marker所在层级
-                // 构建MarkerOption，用于在地图上添加Marker 
-//                MarkerOptions options = new MarkerOptions().position(point) 
-//                        .icon(bitmap)
-//                        .zIndex(9)  //设置marker所在层级
-//                        .draggable(true);  //设置手势拖拽
                 // 在地图上添加Marker，并显示 
                 myOverlay=mBaiduMap.addOverlay(op); 
                 isNew=false;
@@ -332,7 +330,31 @@ public class FingerTab  extends Fragment{
 				return false;
 			} 
         });  
-        
+        //**************展示已采集指纹***************
+        int index=1;
+        //获取地图数据
+    	cursor = sqliteDatabase.rawQuery("select distinct Lat,Lng from FingerData  ", new String[0]);
+    	while (cursor.moveToNext()) { 
+    		double latitude = cursor.getDouble(cursor.getColumnIndex("Lat"));
+    		double longitude = cursor.getDouble(cursor.getColumnIndex("Lng"));
+    		// 定义Maker坐标点 
+            LatLng point = new LatLng(latitude, longitude); 
+            DotOptions op=new  DotOptions().center(point) 
+                    .color(0XFFfaa755)
+                    .radius(25)
+                    .zIndex(9);  //设置marker所在层级
+            // 在地图上添加Marker，并显示 
+            mBaiduMap.addOverlay(op); 
+            //构建文字Option对象，用于在地图上添加文字  
+            TextOptions textOption = new TextOptions()  
+                .fontSize(24)  
+                .fontColor(0xFF000000)  
+                .text(String.valueOf(index))  
+                .position(point);  
+            //在地图上添加该文字对象并显示  
+            mBaiduMap.addOverlay(textOption);
+            index++;
+    	}
 	}
 	
     @Override
@@ -381,6 +403,25 @@ public class FingerTab  extends Fragment{
 	    	}
 	    }
 	}
+    //开启线程画室内图
+    public class DoDrawMap implements Runnable {
+    	private View view;
+
+	    public DoDrawMap(View view) {
+	        this.view = view;
+	    }
+	    public void run() {
+	    	try
+	    	{
+	    		InitMap(view);
+	    	}
+	    	catch(Exception e)
+	    	{
+		    	e.printStackTrace();
+	    	}
+	    }
+	}
+    
     //指纹采集+高斯加权滤波
     private void CollectFinger(){
     	Date    curDate    =   new    Date(System.currentTimeMillis());//获取当前时间  
@@ -396,7 +437,7 @@ public class FingerTab  extends Fragment{
     			for(int i=0;i<o.getValue().size();i++){
     				array[i]=o.getValue().get(i);
     			}
-    			if(array.length>1){
+    			if(array.length>10){
     				//指定总数大于一定值时加入指纹
         			gm.setData(array);
         			double gf=gm.GaussionFilter();

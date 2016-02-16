@@ -26,7 +26,6 @@ public class kmeans {
     	double[][] data=km.data;
         double[][] centers = new double[k][dim]; // 聚类中心点集
         int[] centerCounts = new int[k]; // 各聚类的包含点个数
-//        Arrays.fill(centerCounts, 0);
         int[] labels = new int[data.length]; // 各个点所属聚类标号
         double[][] oldCenters = new double[k][dim]; // 临时缓存旧的聚类中心坐标
 
@@ -39,8 +38,6 @@ public class kmeans {
                 seeds.add(randomInt);
             }
         }
-//            seeds.add(0);
-//            seeds.add(1);
         Collections.sort(seeds);
         for (int i = 0; i < k; i++) {
             int m = seeds.remove(0);
@@ -83,15 +80,16 @@ public class kmeans {
         int maxAttempts = km.attempts > 0 ? km.attempts : km.MAX_ATTEMPTS;
         int attempts = 1;
         double criteria = km.criteria > 0 ? km.criteria : km.MIN_CRITERIA;
-        double criteriaBreakCondition = 0;
         boolean[] flags = new boolean[k]; // 标记哪些中心被修改过
 
         // 迭代
         iterate: while (attempts < maxAttempts) { // 迭代次数不超过最大值，最大中心改变量不超过阈值
-            for (int i = 0; i < k; i++) { // 初始化中心点“是否被修改过”标记
+        	// 初始化中心点“是否被修改过”标记
+            for (int i = 0; i < k; i++) { 
                 flags[i] = false;
             }
-            for (int i = 0; i < data.length; i++) { // 遍历data内所有点
+            // 遍历data内所有指纹点
+            for (int i = 0; i < data.length; i++) { 
                 double minDist = dist(km.data[i], centers[0], km.dim);
                 int label = 0;
                 for (int j = 1; j < k; j++) {
@@ -110,8 +108,8 @@ public class kmeans {
                     flags[label] = true;
                 }
             }
-            updateCenters(km);
-            attempts++;
+            updateCenters(km);//更新中心点
+            attempts++;//迭代次数增加
 
             // 计算每一个被修改过的中心点最大修改量是否超过阈值
             double maxDist = 0;
@@ -127,7 +125,6 @@ public class kmeans {
                 }
             }
             if (maxDist < criteria) {
-                criteriaBreakCondition = maxDist;
                 break iterate;
             }
         }
