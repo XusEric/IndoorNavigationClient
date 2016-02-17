@@ -4,27 +4,41 @@
     android:layout_height="match_parent"
     android:orientation="vertical" 
     android:gravity="center" >
-	
-    <Button
-        android:id="@+id/btnCollect"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/btnCollect"
-        android:text="收集RSSI数据" />
-        
-    <Button
-        android:id="@+id/btnFinger"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/btnCollect"
-        android:layout_centerVertical="true"
-        android:text="指纹数据采集" />
-            
+          
    <TextView 
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
-	    android:text="这是采集的Fragment页"
+	    android:text="RSSI数据收集"
 	    android:textSize="18sp"
 	    android:layout_gravity="center"
 	    />
+   
+	<TextView android:text="收集频率(毫秒)："  
+            android:layout_width="fill_parent"  
+            android:layout_height="wrap_content"/>  
+            
+    <EditText android:id="@+id/rate_number"  
+        android:layout_width="fill_parent"  
+        android:layout_height="wrap_content"
+        android:text="5000"/>  
+        
+    <Button
+        android:id="@+id/btnCollect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="开始收集" />
+        
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="停止收集"
+        android:id="@+id/btnStopCollect"/>
+    
+    <Button
+        android:id="@+id/btnSplit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:text="分割时态" />
+      
 </LinearLayout>

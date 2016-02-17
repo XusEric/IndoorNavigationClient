@@ -33,8 +33,12 @@ import com.pos.util.WebServiceHelper;
 import com.pos.entity.FingerDataModel;
 import com.pos.rssi.gaussionmodel;
 
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.wifi.ScanResult;
@@ -63,13 +67,16 @@ public class FingerTab  extends Fragment{
     private boolean flag=true;//采集线程标志
     private LatLng myLatLng;//当前点对象
     private Long rateNumber=(long) 1000;//线程延迟时间
-    private int maxNumber=5;//最大采集时间（秒）
+    private int maxNumber=Integer.parseInt( ConfigHelper.getCollectTime());//最大采集时间（秒）
+    private int clusterNum=Integer.parseInt( ConfigHelper.getClusterNum());//聚类数
     private Date startDate;//采集开始时间
 	private SQLiteDatabase sqliteDatabase=null;//sqlite操作对象
 	List<ScanResult> list; //周边wifi列表
 	Map<String, List<Double>> wifilist = new HashMap<String, List<Double>>();
 	Map<String, String> ssidlist = new HashMap<String, String>();
 	private WifiManager wifiManager;
+	//声明进度条对话框  
+    ProgressDialog progressDialog = null;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -103,6 +110,7 @@ public class FingerTab  extends Fragment{
 		buttonStart.setOnClickListener(new OnClickListener() {  
             @Override  
             public void onClick(View v) {  
+            	progressDialog.show();
 	            startDate    =   new    Date(System.currentTimeMillis());//获取当前时间  
 	            flag=true;
 	
@@ -119,11 +127,38 @@ public class FingerTab  extends Fragment{
             @Override  
             public void onClick(View v) {  
             	//重置所有点和指纹库
-            	//先清除图层 
-                mBaiduMap.clear(); 
-                sqliteDatabase.delete("FingerData", null, null);  
-                sqliteDatabase.delete("FingerIndex", null, null);  
-                sqliteDatabase.delete("MainIndex", null, null);  
+//            	//先清除图层 
+//                mBaiduMap.clear(); 
+            	//定义复选框选项   
+                final String[] multiChoiceItems = {"FingerData","FingerIndex","MainIndex","LocationLog"};   
+                //复选框默认值：false=未选;true=选中 ,各自对应items[i] 
+                final boolean[] defaultSelectedStatus = {false,false,false,false}; 
+                  
+                //创建对话框   
+                new AlertDialog.Builder(v.getContext())   
+                .setTitle("复选框")//设置对话框标题   
+                .setMultiChoiceItems(multiChoiceItems, defaultSelectedStatus, new OnMultiChoiceClickListener(){   
+                    @Override  
+                    public void onClick(DialogInterface dialog, int which,   
+                            boolean isChecked) {   
+                    //来回重复选择取消
+                    defaultSelectedStatus[which] = isChecked; 
+                    }   
+                })  //设置对话框[肯定]按钮   
+                .setPositiveButton("确定",new DialogInterface.OnClickListener() { 
+			        @Override
+			        public void onClick(DialogInterface dialog, int which) { 
+				        for(int i=0;i<defaultSelectedStatus.length;i++) { 
+					        if(defaultSelectedStatus[i]) { 
+					        	sqliteDatabase.delete(multiChoiceItems[i], null, null); 
+					        } 
+				        } 
+				        // TODO Auto-generated method stub  
+				        Toast.makeText(getContext(),"删除成功 ",Toast.LENGTH_SHORT).show();
+			        } 
+		        }) 
+                .setNegativeButton("取消", null)
+                .show();
             }  
         }); 
 		
@@ -131,105 +166,12 @@ public class FingerTab  extends Fragment{
 		buttonCluster.setOnClickListener(new OnClickListener() {  
             @Override  
             public void onClick(View v) {  
-//            	List<FingerDataModel> allData=new ArrayList<FingerDataModel>();
-            	//获取初始维度
-            	Cursor cursor = sqliteDatabase.rawQuery("select MAC from FingerData group by MAC ", new String[0]);
-		        Map<String,Integer> macAddress=new HashMap<String,Integer>();
-		        while (cursor.moveToNext()) {  
-		        	String mac=cursor.getString(cursor.getColumnIndex("MAC"));
-		        	macAddress.put(mac, 0);
-		        } 
-		        
-            	// 第一个参数String：表名  
-                // 第二个参数String[]:要查询的列名  
-                // 第三个参数String：查询条件  
-                // 第四个参数String[]：查询条件的参数  
-                // 第五个参数String:对查询的结果进行分组  
-                // 第六个参数String：对分组的结果进行限制  
-                // 第七个参数String：对查询的结果进行排序
-            	cursor = sqliteDatabase.query("FingerData", new String[] { "ID","MAC",  
-                      "Lat","Lng","Rssi" }, null, null, null, null, "Lat,Lng");  
-            	double oldLat,oldLng;
-		        // 将光标移动到下一行，从而判断该结果集是否还有下一条数据，如果有则返回true，没有则返回false 
-            	Map<String, Map<String,Integer>> clusterList = new HashMap<String, Map<String,Integer>>();
-            	//按照指纹点分开存储
-		        while (cursor.moveToNext()) {  
-		        	FingerDataModel fdm=new FingerDataModel();
-		        	fdm.ID = cursor.getInt(cursor.getColumnIndex("ID"));  
-		        	fdm.MAC = cursor.getString(cursor.getColumnIndex("MAC"));  
-		            fdm.Lat = cursor.getDouble(cursor.getColumnIndex("Lat"));  
-		            fdm.Lng = cursor.getDouble(cursor.getColumnIndex("Lng"));  
-		            fdm.Rssi = cursor.getInt(cursor.getColumnIndex("Rssi"));  
-		            String key=Double.toString(fdm.Lat)+","+Double.toString(fdm.Lng);
-		            if(!clusterList.containsKey(key)){
-		            	Map<String,Integer> list = new HashMap<String,Integer>();
-		            	list.putAll(macAddress);
-	            		list.put(fdm.MAC, fdm.Rssi);
-	            		clusterList.put(key, list);
-	            	}
-	            	else{
-	            		Map<String,Integer> newlist=clusterList.get(key);
-	            		newlist.put(fdm.MAC, fdm.Rssi);
-	            		clusterList.put(key, newlist);
-	            	}
-		        } 
-		        
-		        //clusterList表示共几个指纹点，macAddress表示每个指纹点对应的RSSI值，取所有采集到的MAC作为纵向维度
-		        double[][] clusterData=new double[clusterList.size()][macAddress.size()];
-		        String[] clusterOrder=new String[clusterList.size()];//存储指纹顺序
-		        String[] clusterMac=new String[macAddress.size()];//存储mac
-		        //只遍历values
-		        int i=0,j=0;
-		        for (Map.Entry<String, Map<String,Integer>> o : clusterList.entrySet()) {
-		        	clusterOrder[i]=o.getKey();
-		        	for (Map.Entry<String,Integer> r : o.getValue().entrySet()) {
-		        		clusterData[i][j]=r.getValue();
-		        		clusterMac[j]=r.getKey();
-		        		j++;
-		        	}
-		        	i++;
-		        	j=0;
-		        }
-		        kmeans k=new kmeans();
-		        kmeansmodel km=new kmeansmodel(2,clusterData,macAddress.size());
-		        //得到分类结果
-		        Map<double[][],int[]> result=k.doKmeans(km);
-		        int index=0;
-		        for(double[][] o:result.keySet()){
-		        	//插入索引表
-		        	for(int m=0;m<o.length;m++){
-		        		for(int n=0;n<o[m].length;n++){
-				        	// 创建ContentValues对象  
-				            ContentValues values = new ContentValues(); 
-				            values.put("IndexNum", m+1);
-				            values.put("MAC", clusterMac[n]);
-				            values.put("Rssi", o[m][n]);
-				            sqliteDatabase.insert("MainIndex", null, values); 
-		        		}
-		        	}
-		        }
-		        for(int[] o:result.values()){
-		        	//插入索引指纹关系表
-		        	for(int m=0;m<o.length;m++){
-		        		String[] key=clusterOrder[m].split(",");
-		        		sqliteDatabase.execSQL("insert into FingerIndex (IndexNum,FPId) select ?,ID from FingerData where Lat=? and Lng=? ",
-		        				new Object[] { o[m]+1, Double.parseDouble(key[0]), Double.parseDouble(key[1]) });
-		        	}
-		        }
-	        	
+	    		progressDialog.show();
+            	DoCluster ds2 = new DoCluster();
+	            Thread t2 = new Thread(ds2);
+	            t2.start();
             }  
         }); 
-        //获取地图控件引用  
-//        mMapView = (MapView)view.findViewById(R.id.bmapViewfinger); 
-//        mBaiduMap=mMapView.getMap();  
-//        //空白地图, 基础地图瓦片将不会被渲染。在地图类型中设置为NONE，将不会使用流量下载基础地图瓦片图层。使用场景：与瓦片图层一起使用，节省流量，提升自定义瓦片图下载速度。
-//        mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NONE);
-//        // 删除百度地图LoGo 
-//        //mMapView.removeViewAt(1);  
-//        mMapView.showScaleControl(false);// 不显示默认比例尺控件
-        // 设置marker图标 
-//        bitmap = BitmapDescriptorFactory.fromResource(R.drawable.btn_wantknow_pre); 
-        
         
         //*********打开数据库相关**********
         // 创建了一个DatabaseHelper对象 
@@ -241,10 +183,27 @@ public class FingerTab  extends Fragment{
         DoDrawMap ds2 = new DoDrawMap(view);
         Thread t2 = new Thread(ds2);
         t2.start();
-		//InitMap(view);
+        
+        InitProgress(view);
 		return view;
 	}
 
+	public void InitProgress(View view ){
+		//创建ProgressDialog对象  
+        progressDialog = new ProgressDialog(view.getContext());  
+        // 设置进度条风格，风格为圆形，旋转的  
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);  
+        // 设置ProgressDialog 标题  
+        progressDialog.setTitle("提示");  
+        // 设置ProgressDialog 提示信息  
+        progressDialog.setMessage("处理中...");   
+        // 设置ProgressDialog 的进度条是否不明确  
+        progressDialog.setIndeterminate(false);           
+        // 设置ProgressDialog 是否可以按退回按键取消  
+        progressDialog.setCancelable(false);
+        // 让ProgressDialog显示  
+        //progressDialog.show(); 
+	}
 
 	public void InitMap(View view ){
 		//获取地图控件引用  
@@ -376,6 +335,7 @@ public class FingerTab  extends Fragment{
         mMapView.onPause();  
         }
     
+    //采集指纹数据线程
     public class DoCollect implements Runnable {
 	    private String name;
 
@@ -414,6 +374,107 @@ public class FingerTab  extends Fragment{
 	    	try
 	    	{
 	    		InitMap(view);
+	    	}
+	    	catch(Exception e)
+	    	{
+		    	e.printStackTrace();
+	    	}
+	    }
+	}
+    
+    //开启分类线程
+    public class DoCluster implements Runnable {
+	    public void run() {
+	    	Message msg = new Message();
+	    	try
+	    	{
+            	//获取初始维度
+            	Cursor cursor = sqliteDatabase.rawQuery("select MAC from FingerData group by MAC ", new String[0]);
+		        Map<String,Integer> macAddress=new HashMap<String,Integer>();
+		        while (cursor.moveToNext()) {  
+		        	String mac=cursor.getString(cursor.getColumnIndex("MAC"));
+		        	macAddress.put(mac, 0);
+		        } 
+		        
+            	// 第一个参数String：表名  
+                // 第二个参数String[]:要查询的列名  
+                // 第三个参数String：查询条件  
+                // 第四个参数String[]：查询条件的参数  
+                // 第五个参数String:对查询的结果进行分组  
+                // 第六个参数String：对分组的结果进行限制  
+                // 第七个参数String：对查询的结果进行排序
+            	cursor = sqliteDatabase.query("FingerData", new String[] { "ID","MAC",  
+                      "Lat","Lng","Rssi" }, null, null, null, null, "Lat,Lng");  
+            	
+		        // 将光标移动到下一行，从而判断该结果集是否还有下一条数据，如果有则返回true，没有则返回false 
+            	Map<String, Map<String,Integer>> clusterList = new HashMap<String, Map<String,Integer>>();
+            	//按照指纹点分开存储
+		        while (cursor.moveToNext()) {  
+		        	FingerDataModel fdm=new FingerDataModel();
+		        	fdm.ID = cursor.getInt(cursor.getColumnIndex("ID"));  
+		        	fdm.MAC = cursor.getString(cursor.getColumnIndex("MAC"));  
+		            fdm.Lat = cursor.getDouble(cursor.getColumnIndex("Lat"));  
+		            fdm.Lng = cursor.getDouble(cursor.getColumnIndex("Lng"));  
+		            fdm.Rssi = cursor.getInt(cursor.getColumnIndex("Rssi"));  
+		            String key=Double.toString(fdm.Lat)+","+Double.toString(fdm.Lng);
+		            if(!clusterList.containsKey(key)){
+		            	Map<String,Integer> list = new HashMap<String,Integer>();
+		            	list.putAll(macAddress);
+	            		list.put(fdm.MAC, fdm.Rssi);
+	            		clusterList.put(key, list);
+	            	}
+	            	else{
+	            		Map<String,Integer> newlist=clusterList.get(key);
+	            		newlist.put(fdm.MAC, fdm.Rssi);
+	            		clusterList.put(key, newlist);
+	            	}
+		        } 
+		        
+		        //clusterList表示共几个指纹点，macAddress表示每个指纹点对应的RSSI值，取所有采集到的MAC作为纵向维度
+		        double[][] clusterData=new double[clusterList.size()][macAddress.size()];
+		        String[] clusterOrder=new String[clusterList.size()];//存储指纹顺序
+		        String[] clusterMac=new String[macAddress.size()];//存储mac
+		        //只遍历values
+		        int i=0,j=0;
+		        for (Map.Entry<String, Map<String,Integer>> o : clusterList.entrySet()) {
+		        	clusterOrder[i]=o.getKey();
+		        	for (Map.Entry<String,Integer> r : o.getValue().entrySet()) {
+		        		clusterData[i][j]=r.getValue();
+		        		clusterMac[j]=r.getKey();
+		        		j++;
+		        	}
+		        	i++;
+		        	j=0;
+		        }
+		        kmeans k=new kmeans();
+		        kmeansmodel km=new kmeansmodel(clusterNum,clusterData,macAddress.size());
+		        //得到分类结果
+		        Map<double[][],int[]> result=k.doKmeans(km);
+		        
+		        for(double[][] o:result.keySet()){
+		        	//插入索引表
+		        	for(int m=0;m<o.length;m++){
+		        		for(int n=0;n<o[m].length;n++){
+				        	// 创建ContentValues对象  
+				            ContentValues values = new ContentValues(); 
+				            values.put("IndexNum", m+1);
+				            values.put("MAC", clusterMac[n]);
+				            values.put("Rssi", o[m][n]);
+				            sqliteDatabase.insert("MainIndex", null, values); 
+		        		}
+		        	}
+		        }
+		        for(int[] o:result.values()){
+		        	//插入索引指纹关系表
+		        	for(int m=0;m<o.length;m++){
+		        		String[] key=clusterOrder[m].split(",");
+		        		sqliteDatabase.execSQL("insert into FingerIndex (IndexNum,FPId) select ?,ID from FingerData where Lat=? and Lng=? ",
+		        				new Object[] { o[m]+1, Double.parseDouble(key[0]), Double.parseDouble(key[1]) });
+		        	}
+		        }
+		        
+		        msg.what = 2;
+		        mHandler.sendMessage(msg);
 	    	}
 	    	catch(Exception e)
 	    	{
@@ -498,15 +559,20 @@ public class FingerTab  extends Fragment{
             switch (msg.what)
             {
                 case -1:
-                	System.out.println("异常提示:"+msg.obj.toString());
+                	Toast.makeText(getContext(),"异常提示:"+msg.obj.toString(),Toast.LENGTH_SHORT).show();
                     break;
                 case 0:
                     System.out.println("错误:"+msg.obj.toString());
                     break;
                 case 1:
+                	progressDialog.cancel();
                 	Toast.makeText(getContext(),"采集完毕 ",Toast.LENGTH_SHORT).show();
                 	flag=false;
                 	isNew=true;//采集完毕自动新增一个点
+                    break;
+                case 2:
+                	progressDialog.cancel();
+                	Toast.makeText(getContext(),"分类完毕 ",Toast.LENGTH_SHORT).show();
                     break;
                 default:
                     break;

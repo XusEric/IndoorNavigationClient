@@ -26,10 +26,14 @@ import com.baidu.mapapi.model.LatLng;
 import com.pos.rssi.*;
 import com.pos.indoorpositioning.R;
 import com.pos.indoorpositioning.FingerTab.DoCollect;
+import com.pos.util.ConfigHelper;
 import com.pos.util.DataBaseHelper;
 import com.pos.util.WebServiceHelper;
 import com.pos.entity.*;
 
+import android.app.AlertDialog;
+import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.wifi.ScanResult;
@@ -46,14 +50,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.text.SimpleDateFormat;
 
 public class MainTab extends Fragment{
-	private EditText userNameEditText;  
-    private EditText userPwdEditText;  
-    private Button loginButton; 
-    private TextView t;
+//	private EditText userNameEditText;  
+//    private EditText userPwdEditText;  
+//    private Button loginButton; 
+//    private TextView t;
     MapView mMapView = null;  
-	private Button buttonLocation,buttonStop;
+	private Button buttonLocation,buttonStop,buttonContinue,buttonLab;
 	private boolean flag=true;//定位线程停止标志
 	private WifiManager wifiManager;
 	private SQLiteDatabase sqliteDatabase=null;//sqlite操作对象
@@ -62,7 +67,9 @@ public class MainTab extends Fragment{
 	Map<String, List<Double>> wifilist = new HashMap<String, List<Double>>();
 	private BaiduMap mBaiduMap;
 	private Overlay  myOverlay;//当前覆盖点
-	
+    private int kNum=Integer.parseInt( ConfigHelper.getKNum());//k值
+    BitmapDescriptor bitmap;//定位图标
+    String FPNo="";
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -76,21 +83,56 @@ public class MainTab extends Fragment{
 
 		buttonLocation = (Button)view.findViewById(R.id.btnLocation);
 		buttonStop = (Button)view.findViewById(R.id.btnStop);
+		buttonContinue = (Button)view.findViewById(R.id.btnContinue);
+		buttonLab = (Button)view.findViewById(R.id.btnLab);
+        bitmap = BitmapDescriptorFactory.fromResource(R.drawable.dingwei1); 
+        
+		//获取Wi-Fi Manager对象
+		wifiManager= (WifiManager)getActivity(). getSystemService(getContext().WIFI_SERVICE);
 
-		//开启定位
+		//开启单步定位
 		buttonLocation.setOnClickListener(new OnClickListener() {  
             @Override  
             public void onClick(View v) {  
-	            flag=true;
-	    		//获取Wi-Fi Manager对象
-	    		wifiManager= (WifiManager)getActivity(). getSystemService(getContext().WIFI_SERVICE);
-	    		DoLocation ds1 = new DoLocation("");
+	    		DoLocation ds1 = new DoLocation();
 	            Thread t1 = new Thread(ds1);
 	            t1.start();
             }  
         }); 
+		
+		//开启连续定位
+		buttonContinue.setOnClickListener(new OnClickListener() {  
+            @Override  
+            public void onClick(View v) {  
+	            flag=true;
+	    		DoContinueLocation ds2 = new DoContinueLocation();
+	            Thread t2 = new Thread(ds2);
+	            t2.start();
+            }  
+        }); 
+		
 
-		//停止定位
+		//开启实验方式定位
+		buttonLab.setOnClickListener(new OnClickListener() {  
+            @Override  
+            public void onClick(View v) {  
+            	final EditText etFPNo = new EditText(v.getContext());
+	    		//输入当前实验的对应指纹点编号
+	    		new AlertDialog.Builder(v.getContext()).setTitle("输入指纹点编号").setView(etFPNo)
+            	.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            	public void onClick(DialogInterface dialog, int which) {
+            		FPNo=etFPNo.getText().toString();
+            		flag=true;
+    	            DoLabLocation ds3 = new DoLabLocation(FPNo);
+    	            Thread t3 = new Thread(ds3);
+    	            t3.start();
+            	}})
+            	.setNegativeButton("取消",null)
+            	.show();
+            }  
+        }); 
+
+		//停止连续定位
 		buttonStop.setOnClickListener(new OnClickListener() {  
             @Override  
             public void onClick(View v) {  
@@ -167,10 +209,10 @@ public class MainTab extends Fragment{
             //在地图上添加多边形Option，用于显示  
             mBaiduMap.addOverlay(polygonOption);
             //添加标题、说明
-            BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.drawable.cart); 
+            BitmapDescriptor bitmapCart = BitmapDescriptorFactory.fromResource(R.drawable.cart); 
             LatLng point = new LatLng(Double.parseDouble(attr[1].split(",")[0]), Double.parseDouble(attr[1].split(",")[1])); 
 	          MarkerOptions options = new MarkerOptions().position(point) 
-	          .icon(bitmap)
+	          .icon(bitmapCart)
 	          .title(Title)
 	          .zIndex(9)  //设置marker所在层级
 	          .draggable(true);  //设置手势拖拽
@@ -179,108 +221,11 @@ public class MainTab extends Fragment{
 	}
 	
 	public class DoLocation implements Runnable {
-	    private String name;
-
-	    public DoLocation(String name) {
-	        this.name = name;
-	    }
-
 	    public void run() {
 	    	Message msg = new Message();
 	    	try
 	    	{
-	    		//开启扫描
-	    		wifiManager.startScan();
-	    		//获取扫描结果
-	            list = wifiManager.getScanResults(); 
-	            Map<String, Double> Rssi = new HashMap<String, Double>();//存储mac-rssi映射列表
-	            for (int i = 0; i < list.size(); i++) { 
-	            	Rssi.put(list.get(i).BSSID, (double)list.get(i).level);
-            	}
-	            fingermodel testData = new fingermodel(0,0,Rssi);//待定位点原型
-	    		//第一步，查找最近索引值
-	            //获取索引表
-            	Cursor cursor = sqliteDatabase.rawQuery("select * from MainIndex ", new String[0]);
-            	//索引目录
-		        Map<Integer,Map<String, Double>> indexData=new HashMap<Integer,Map<String, Double>>();
-		        while (cursor.moveToNext()) {  
-		        	int key = cursor.getInt(cursor.getColumnIndex("IndexNum"));
-		        	String mac=cursor.getString(cursor.getColumnIndex("MAC"));
-		        	int rssi=cursor.getInt(cursor.getColumnIndex("Rssi"));		        	
-		        	if(!indexData.containsKey(key)){
-		            	Map<String,Double> list = new HashMap<String,Double>();
-	            		list.put(mac, (double)rssi);
-	            		indexData.put(key, list);
-	            	}
-	            	else{
-	            		Map<String,Double> newlist=indexData.get(key);
-	            		newlist.put(mac, (double)rssi);
-	            		indexData.put(key, newlist);
-	            	}
-		        } 
-
-		        kwnn kwnn = new kwnn();
-	            int nearestIndex=0;//最近索引值
-	            
-	            double minD=0.00;
-		        for (Map.Entry<Integer,Map<String, Double>> entry : indexData.entrySet()) {
-		        	fingermodel fm=new fingermodel(0,0,entry.getValue());
-		        	double d=kwnn.calDistance(testData, fm);
-		        	if(minD==0||d<minD){
-		        		nearestIndex=entry.getKey();
-		        		minD=d;
-		        	}
-		        }
-	            
-	            //第二步，匹配索引拿到对应指纹数据
-		        cursor = sqliteDatabase.rawQuery("select d.MAC,d.Lat,d.Lng,d.Rssi from FingerIndex f join FingerData d on f.FPId=d.ID where f.IndexNum=? "
-		        						, new String[]{String.valueOf(nearestIndex)});
-
-            	Map<String, Map<String,Double>> fingerList = new HashMap<String, Map<String,Double>>();
-		        while (cursor.moveToNext()) { 
-		        	FingerDataModel fdm=new FingerDataModel(); 
-		        	fdm.MAC = cursor.getString(cursor.getColumnIndex("MAC"));  
-		            fdm.Lat = cursor.getDouble(cursor.getColumnIndex("Lat"));  
-		            fdm.Lng = cursor.getDouble(cursor.getColumnIndex("Lng"));  
-		            fdm.Rssi = cursor.getInt(cursor.getColumnIndex("Rssi"));  
-		            String key=Double.toString(fdm.Lat)+","+Double.toString(fdm.Lng);
-		            if(!fingerList.containsKey(key)){
-		            	Map<String,Double> list = new HashMap<String,Double>();
-	            		list.put(fdm.MAC, (double)fdm.Rssi);
-	            		fingerList.put(key, list);
-	            	}
-	            	else{
-	            		Map<String,Double> newlist=fingerList.get(key);
-	            		newlist.put(fdm.MAC, (double)fdm.Rssi);
-	            		fingerList.put(key, newlist);
-	            	}
-		        }
-	            List<fingermodel> datas = new ArrayList<fingermodel>(); 
-		        for (Map.Entry<String,Map<String, Double>> entry : fingerList.entrySet()) {
-		        	String[] key=entry.getKey().split(",");
-		        	fingermodel fm=new fingermodel(Double.parseDouble(key[0]),Double.parseDouble(key[1]),entry.getValue());
-		        	datas.add(fm);
-		        }
-		        String result=kwnn.startkwnn(datas, testData, 2);
-		        //第三步，在地图标注
-		        // 定义Maker坐标点 
-		        double latitude=Double.parseDouble(result.split(",")[0]);
-		        double longitude=Double.parseDouble(result.split(",")[1]);
-                LatLng point = new LatLng(latitude, longitude); 
-//                DotOptions op=new  DotOptions().center(point) 
-//                        .color(0XFFfaa755)
-//                        .radius(25)
-//                        .zIndex(9);  //设置marker所在层级
-                BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.drawable.dingwei1); 
-                MarkerOptions options = new MarkerOptions().position(point) 
-          	          .icon(bitmap)
-          	          .title("test")
-          	          .zIndex(9);  //设置marker所在层级
-                if(myOverlay!=null){
-                	myOverlay.remove();
-                }
-                myOverlay=mBaiduMap.addOverlay(options); 
-		        
+	    		String result=startLocation();
 		    	msg.what = 1;
 		    	//定义参数对象
 //		        HashMap<String, Object> paramsMap = new HashMap<String, Object>();  
@@ -302,26 +247,190 @@ public class MainTab extends Fragment{
 	    }
 	}
 	
+	//连续定位
+	public class DoContinueLocation implements Runnable {
+	    public void run() {
+    		Message msg = new Message();
+	    	try
+	    	{	    		
+	    		while(flag){
+		    		String result=startLocation();	    			
+	    		}
+	    		msg.what = 2;
+	            handler.sendMessage(msg);
+	    	}
+	    	catch(Exception e)
+	    	{
+		    	msg.what = -1;
+		        msg.obj=e;
+	            handler.sendMessage(msg);
+	    		e.printStackTrace();
+	    	}
+	    }
+	}
+	
+	//实验连续定位，并记录日志
+	public class DoLabLocation implements Runnable {
+		private String _fpNo;
+		
+		public DoLabLocation(String fpNo){
+			this._fpNo=fpNo;
+		}
+		
+	    public void run() {
+    		Message msg = new Message();
+	    	try
+	    	{
+	    		String FPNo=_fpNo; 
+	    		Date    startDate,endDate;
+	    		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	    		while(flag){
+	    			startDate    =   new    Date(System.currentTimeMillis());//开始时间  
+		    		String result=startLocation();
+		    		endDate    =   new    Date(System.currentTimeMillis());//结束时间  
+	    	    	long diff = endDate.getTime() - startDate.getTime();//微秒级别
+	    	    	//long between=(diff)/1000;//除以1000是为了转换成秒
+	    	    	
+	    	    	// 创建ContentValues对象  
+                  ContentValues values = new ContentValues();
+                  values.put("FPNo", FPNo);  
+                  values.put("Lat", Double.parseDouble(result.split(",")[0])); 
+                  values.put("Lng", Double.parseDouble(result.split(",")[1]));  
+                  values.put("Duration", diff);   
+                  values.put("CreateTime", formatter.format(endDate));  
+                  sqliteDatabase.insert("LocationLog", null, values);
+	    		}
+	    		msg.what = 2;
+	            handler.sendMessage(msg);
+	    	}
+	    	catch(Exception e)
+	    	{
+		    	msg.what = -1;
+		        msg.obj=e;
+	            handler.sendMessage(msg);
+	    		e.printStackTrace();
+	    	}
+	    }
+	}
+	
 	private Handler handler = new Handler(){
         @Override
         public void handleMessage(Message msg){
-            //findViewById(R.id.Btn_Login).setEnabled(true);
             switch (msg.what)
             {
                 case -1:
-                	System.out.println("异常提示:"+msg.obj.toString());
+                	Toast.makeText(getContext(),"异常提示:"+msg.obj.toString(),Toast.LENGTH_SHORT).show();
                     break;
                 case 0:
                     System.out.println("错误:"+msg.obj.toString());
                     break;
                 case 1:
-                	Toast.makeText(getContext(),"定位完毕 ",Toast.LENGTH_SHORT).show();
+                	Toast.makeText(getContext(),"单步定位完毕 ",Toast.LENGTH_SHORT).show();
+                    break;
+                case 2:
+                	Toast.makeText(getContext(),"结束定位 ",Toast.LENGTH_SHORT).show();
                     break;
                 default:
                     break;
             }
         }
     };
+    
+    //定位主程序
+    public String startLocation(){
+    	//开启扫描
+		wifiManager.startScan();
+		//获取扫描结果
+        list = wifiManager.getScanResults(); 
+        Map<String, Double> Rssi = new HashMap<String, Double>();//存储mac-rssi映射列表
+        for (int i = 0; i < list.size(); i++) { 
+        	Rssi.put(list.get(i).BSSID, (double)list.get(i).level);
+    	}
+        fingermodel testData = new fingermodel(0,0,Rssi);//待定位点原型
+		//第一步，查找最近索引值
+        //获取索引表
+    	Cursor cursor = sqliteDatabase.rawQuery("select * from MainIndex ", new String[0]);
+    	//索引目录
+        Map<Integer,Map<String, Double>> indexData=new HashMap<Integer,Map<String, Double>>();
+        while (cursor.moveToNext()) {  
+        	int key = cursor.getInt(cursor.getColumnIndex("IndexNum"));
+        	String mac=cursor.getString(cursor.getColumnIndex("MAC"));
+        	int rssi=cursor.getInt(cursor.getColumnIndex("Rssi"));		        	
+        	if(!indexData.containsKey(key)){
+            	Map<String,Double> list = new HashMap<String,Double>();
+        		list.put(mac, (double)rssi);
+        		indexData.put(key, list);
+        	}
+        	else{
+        		Map<String,Double> newlist=indexData.get(key);
+        		newlist.put(mac, (double)rssi);
+        		indexData.put(key, newlist);
+        	}
+        } 
+
+        kwnn kwnn = new kwnn();
+        int nearestIndex=0;//最近索引值
+        
+        double minD=0.00;
+        for (Map.Entry<Integer,Map<String, Double>> entry : indexData.entrySet()) {
+        	fingermodel fm=new fingermodel(0,0,entry.getValue());
+        	double d=kwnn.calDistance(testData, fm);
+        	if(minD==0||d<minD){
+        		nearestIndex=entry.getKey();
+        		minD=d;
+        	}
+        }
+        
+        //第二步，匹配索引拿到对应指纹数据
+        cursor = sqliteDatabase.rawQuery("select d.MAC,d.Lat,d.Lng,d.Rssi from FingerIndex f join FingerData d on f.FPId=d.ID where f.IndexNum=? "
+        						, new String[]{String.valueOf(nearestIndex)});
+
+    	Map<String, Map<String,Double>> fingerList = new HashMap<String, Map<String,Double>>();
+        while (cursor.moveToNext()) { 
+        	FingerDataModel fdm=new FingerDataModel(); 
+        	fdm.MAC = cursor.getString(cursor.getColumnIndex("MAC"));  
+            fdm.Lat = cursor.getDouble(cursor.getColumnIndex("Lat"));  
+            fdm.Lng = cursor.getDouble(cursor.getColumnIndex("Lng"));  
+            fdm.Rssi = cursor.getInt(cursor.getColumnIndex("Rssi"));  
+            String key=Double.toString(fdm.Lat)+","+Double.toString(fdm.Lng);
+            if(!fingerList.containsKey(key)){
+            	Map<String,Double> list = new HashMap<String,Double>();
+        		list.put(fdm.MAC, (double)fdm.Rssi);
+        		fingerList.put(key, list);
+        	}
+        	else{
+        		Map<String,Double> newlist=fingerList.get(key);
+        		newlist.put(fdm.MAC, (double)fdm.Rssi);
+        		fingerList.put(key, newlist);
+        	}
+        }
+        List<fingermodel> datas = new ArrayList<fingermodel>(); 
+        for (Map.Entry<String,Map<String, Double>> entry : fingerList.entrySet()) {
+        	String[] key=entry.getKey().split(",");
+        	fingermodel fm=new fingermodel(Double.parseDouble(key[0]),Double.parseDouble(key[1]),entry.getValue());
+        	datas.add(fm);
+        }
+        String result=kwnn.startkwnn(datas, testData, kNum);
+        //第三步，在地图标注
+        // 定义Maker坐标点 
+        double latitude=Double.parseDouble(result.split(",")[0]);
+        double longitude=Double.parseDouble(result.split(",")[1]);
+        LatLng point = new LatLng(latitude, longitude); 
+//        DotOptions op=new  DotOptions().center(point) 
+//                .color(0XFFfaa755)
+//                .radius(25)
+//                .zIndex(9);  //设置marker所在层级
+        MarkerOptions options = new MarkerOptions().position(point) 
+  	          .icon(bitmap)
+  	          .title("test")
+  	          .zIndex(9);  //设置marker所在层级
+        if(myOverlay!=null){
+        	myOverlay.remove();
+        }
+        myOverlay=mBaiduMap.addOverlay(options); 
+        
+        return result;
+    }
     
     @Override
 	public void onDestroy() {  

@@ -4,5 +4,6 @@
     <color name="topbar_bg">#b6292d</color>
     <color name="bottomtab_normal">#a2a1a1</color>
     <color name="bottomtab_press">#2f6fa8</color>
-<color name="line">#a2a1a1</color>
+	<color name="line">#a2a1a1</color>
+	<color name="black">#000000</color>
 </resources>

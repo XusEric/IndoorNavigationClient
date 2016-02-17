@@ -21,6 +21,11 @@
 <uses-permission android:name="android.permission.WRITE_SETTINGS" />
 <!--百度Map END-->
 
+<!-- 屏幕保持唤醒权限 -->
+   <uses-permission android:name="android.permission.WAKE_LOCK"/>
+<!-- 允许访问底层电源管理权限 -->
+   <uses-permission android:name="android.permission.DEVICE_POWER"/>
+    
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -39,6 +44,11 @@
         android:name="com.baidu.lbsapi.API_KEY"  
         android:value="9H6chhWsM4XZhXoK76lvrpXT" />
         
+        <service android:enabled="true" android:name=".CollectService">
+			<intent-filter>
+				<action android:name="com.example.testrssi.CollectService" />
+			</intent-filter>
+		</service>
     </application>
 
 </manifest>

@@ -7,6 +7,7 @@ import com.pos.indoorpositioning.CollectTab;
 import com.pos.indoorpositioning.R;
 import com.pos.indoorpositioning.SettingTab;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -42,7 +43,6 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
             // We were just launched 
 			initUI();
 			initTab();
-            
         } else {
             // We are being restored
             //Bundle map = savedInstanceState.getBundle(ICICLE_KEY);

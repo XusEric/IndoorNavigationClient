@@ -7,6 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+/** 
+ * 聚类算法主体类 
+ * @author xusong 
+ * @date 2016-1-29 
+ */  
 public class kmeans {
 	/**
      * 做Kmeans运算

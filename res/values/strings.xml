@@ -7,4 +7,7 @@
     <string name="bottom_tab_setting">设置</string>
     <string name="bottom_tab_collect">收集</string>
     <string name="bottom_tab_finger">指纹</string>
+    <string name="setting_tab_finger">指纹采集设置</string>
+    <string name="setting_tab_location">定位设置</string>
+    <string name="setting_tab_other">其他设置</string>
 </resources>

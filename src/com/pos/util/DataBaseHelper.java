@@ -42,6 +42,8 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         db.execSQL(sql);
         sql = "CREATE TABLE CollectWifi (ID INTEGER primary key autoincrement,SSID nvarchar(50),MAC nvarchar(20),LinkSpeed nvarchar(10),Rssi int,CreateTime datetime)";
         db.execSQL(sql);
+        sql = "CREATE TABLE LocationLog (ID INTEGER primary key autoincrement,FPNo nvarchar(50),Lat double,Lng double,Duration int,CreateTime datetime)";
+        db.execSQL(sql);
 	}
 
 	@Override
