@@ -16,7 +16,7 @@ import android.view.View.OnClickListener;
 
 public class SettingTab extends Fragment {
 	private Button buttonSave,buttonReset;
-	private EditText etTime,etCluster,etKNum;
+	private EditText etTime,etCluster,etKNum,etFloor;
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -32,6 +32,7 @@ public class SettingTab extends Fragment {
     	etTime=(EditText)view.findViewById(R.id.colTime);
     	etCluster=(EditText)view.findViewById(R.id.etCluster);
     	etKNum=(EditText)view.findViewById(R.id.etKNum);
+    	etFloor=(EditText)view.findViewById(R.id.etFloor);
 
 		buttonSave.setOnClickListener(new OnClickListener() {  
             @Override  
@@ -39,9 +40,11 @@ public class SettingTab extends Fragment {
             	String collectTime=etTime.getText().toString(); 
             	String clusterNum=etCluster.getText().toString(); 
             	String kNum=etKNum.getText().toString();  
+            	String floor=etFloor.getText().toString();  
             	ConfigHelper.writes("COLLECTTIME", collectTime);
             	ConfigHelper.writes("CLUSTERNUM", clusterNum);
             	ConfigHelper.writes("KNUM", kNum);
+            	ConfigHelper.writes("FLOOR", floor);
             	Toast.makeText(SettingTab.this.getActivity(), "±£´æ³É¹¦£¡", Toast.LENGTH_LONG).show();  
             }  
         }); 
@@ -59,5 +62,6 @@ public class SettingTab extends Fragment {
     	etTime.setText(ConfigHelper.getCollectTime());
     	etCluster.setText(ConfigHelper.getClusterNum());
     	etKNum.setText(ConfigHelper.getKNum());
+    	etFloor.setText(ConfigHelper.getFloor());
 	}
 }

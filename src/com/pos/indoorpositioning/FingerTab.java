@@ -29,7 +29,6 @@ import com.baidu.mapapi.map.TextOptions;
 import com.baidu.mapapi.model.LatLng;
 import com.pos.rssi.kmeans;
 import com.pos.rssi.kmeansmodel;
-import com.pos.util.WebServiceHelper;
 import com.pos.entity.FingerDataModel;
 import com.pos.rssi.gaussionmodel;
 
@@ -217,9 +216,12 @@ public class FingerTab  extends Fragment{
         MapStatusUpdate u = MapStatusUpdateFactory.zoomTo(zoomLevel);
         mBaiduMap.animateMapStatus(u);
         //获取地图数据
-    	Cursor cursor = sqliteDatabase.rawQuery("select * from Map where Floor=? ", new String[]{"1"});
+        String floor=ConfigHelper.getFloor();
+    	Cursor cursor = sqliteDatabase.rawQuery("select * from Map where Floor=? ", new String[]{floor});
     	cursor.moveToFirst(); 
-        String polygon= cursor.getString(cursor.getColumnIndex("Polygon"));
+    	String polygon="";
+    	if(cursor.getCount()!=0)
+        	polygon= cursor.getString(cursor.getColumnIndex("Polygon"));
         String[] pts=polygon.split(";");
         int color=0xFFFFFF00;
         String Title="";
@@ -229,9 +231,18 @@ public class FingerTab  extends Fragment{
         	String[] pt=all[0].split("\\|");//多边形坐标
         	String[] attr=all[1].split("\\|");//多边形属性,颜色|中心
         	switch(Integer.parseInt(attr[0])){
-        	case 1:
-        		color=0xAAE5F2FF;
-        		Title="服装";
+	        	case 1:
+	        		color=0xAAE5F2FF;
+	        		Title="cart";
+	        		break;
+	        	case 2:
+	        		color=0xAAffccff;
+	        		Title="服装";
+	        		break;
+	        	case 3:
+	        		color=0xAAe6b3cc;
+	        		Title="餐厅";
+	        		break; 
         	}
         	for(int j=0;j<pt.length&&pt[j]!="";j++){
         		LatLng latlng = new LatLng(Double.parseDouble(pt[j].split(",")[0]), Double.parseDouble(pt[j].split(",")[1]));
@@ -245,14 +256,14 @@ public class FingerTab  extends Fragment{
             //在地图上添加多边形Option，用于显示  
             mBaiduMap.addOverlay(polygonOption);
             //添加标题、说明
-            BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.drawable.cart); 
-            LatLng point = new LatLng(Double.parseDouble(attr[1].split(",")[0]), Double.parseDouble(attr[1].split(",")[1])); 
-	          MarkerOptions options = new MarkerOptions().position(point) 
-	          .icon(bitmap)
-	          .title(Title)
-	          .zIndex(9)  //设置marker所在层级
-	          .draggable(true);  //设置手势拖拽
-	        mBaiduMap.addOverlay(options);
+//            BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.drawable.cart); 
+//            LatLng point = new LatLng(Double.parseDouble(attr[1].split(",")[0]), Double.parseDouble(attr[1].split(",")[1])); 
+//	          MarkerOptions options = new MarkerOptions().position(point) 
+//	          .icon(bitmap)
+//	          .title(Title)
+//	          .zIndex(9)  //设置marker所在层级
+//	          .draggable(true);  //设置手势拖拽
+//	        mBaiduMap.addOverlay(options);
         } 
         
         mBaiduMap.setOnMapClickListener(new OnMapClickListener() { 

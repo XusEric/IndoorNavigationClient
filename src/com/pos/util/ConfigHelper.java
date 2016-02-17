@@ -13,6 +13,7 @@ public class ConfigHelper {
 	static private String _collectTime = null;
 	static private String _clusterNum = null;
 	static private String _kNum = null;
+	static private String _floor = null;
 	static{
 		loads();
 	}
@@ -30,6 +31,7 @@ public class ConfigHelper {
 			_collectTime = dbProps.getProperty("COLLECTTIME");//采集时长
 			_clusterNum= dbProps.getProperty("CLUSTERNUM");//聚类数
 			_kNum= dbProps.getProperty("KNUM");//k值
+			_floor= dbProps.getProperty("FLOOR");//楼层
 		}
 		catch (Exception e) {
 			System.err.println("不能读取属性文件. " +"请确保config.properties在指定的路径中");
@@ -87,5 +89,10 @@ public class ConfigHelper {
 		if(_kNum==null)
 			loads();
 			return _kNum;
+	}
+	public static String getFloor() {
+		if(_floor==null)
+			loads();
+			return _floor;
 	}
 }
