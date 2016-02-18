@@ -98,6 +98,7 @@ public class FingerTab  extends Fragment{
 		buttonStart = (Button)view.findViewById(R.id.btnStart);
 		buttonReset = (Button)view.findViewById(R.id.btnReset);
 		buttonCluster = (Button)view.findViewById(R.id.btnCluster);
+		buttonNew.setVisibility(View.GONE);
 		
 		//新建指纹点
 		buttonNew.setOnClickListener(new OnClickListener() {  
@@ -110,6 +111,7 @@ public class FingerTab  extends Fragment{
 		buttonStart.setOnClickListener(new OnClickListener() {  
             @Override  
             public void onClick(View v) {  
+                progressDialog.setMessage("采集中..."); 
             	progressDialog.show();
 	            startDate    =   new    Date(System.currentTimeMillis());//获取当前时间  
 	            flag=true;
@@ -165,7 +167,8 @@ public class FingerTab  extends Fragment{
 		//分类
 		buttonCluster.setOnClickListener(new OnClickListener() {  
             @Override  
-            public void onClick(View v) {  
+            public void onClick(View v) { 
+                progressDialog.setMessage("分类中..."); 
 	    		progressDialog.show();
             	DoCluster ds2 = new DoCluster();
 	            Thread t2 = new Thread(ds2);
@@ -486,6 +489,7 @@ public class FingerTab  extends Fragment{
 		        }
 		        
 		        msg.what = 2;
+		        msg.obj=km.centerCounts;
 		        mHandler.sendMessage(msg);
 	    	}
 	    	catch(Exception e)
@@ -500,6 +504,7 @@ public class FingerTab  extends Fragment{
     	Date    curDate    =   new    Date(System.currentTimeMillis());//获取当前时间  
     	long diff = curDate.getTime() - startDate.getTime();//这样得到的差值是微秒级别 
     	long between=(diff)/1000;//除以1000是为了转换成秒
+		Message msg = new Message();
     	if(between>=maxNumber){
     		//此点指纹采集结束
     		gaussionmodel gm=new gaussionmodel();
@@ -532,7 +537,6 @@ public class FingerTab  extends Fragment{
                   sqliteDatabase.insert("FingerData", null, values);
     			}
     		}
-    		Message msg = new Message();
     		msg.what = 1;
 	        msg.obj="";
     		mHandler.sendMessage(msg);
@@ -560,8 +564,9 @@ public class FingerTab  extends Fragment{
             	}
         		ssidlist.put(scanResult.BSSID, scanResult.SSID);
             } 
-    		
-
+    		msg.what = 3;
+            msg.obj=between;
+    		mHandler.sendMessage(msg);
     	}
     }
     
@@ -576,7 +581,7 @@ public class FingerTab  extends Fragment{
                 case 0:
                     System.out.println("错误:"+msg.obj.toString());
                     break;
-                case 1:
+                case 1://采集完毕
                 	progressDialog.cancel();
                 	Toast.makeText(getContext(),"采集完毕 ",Toast.LENGTH_SHORT).show();
                 	flag=false;
@@ -584,7 +589,17 @@ public class FingerTab  extends Fragment{
                     break;
                 case 2:
                 	progressDialog.cancel();
-                	Toast.makeText(getContext(),"分类完毕 ",Toast.LENGTH_SHORT).show();
+                	int[] result=(int[]) msg.obj;
+                	int max=result[0];
+                	for(int i=0;i<result.length;i++){
+                		if(max>result[i]){
+                			max=result[i];
+                		}
+                	}
+                	Toast.makeText(getContext(),"分类完毕，最大k值: "+max,Toast.LENGTH_SHORT).show();
+                    break;
+                case 3://采集过程中
+                	progressDialog.setMessage("采集中..."+msg.obj.toString());//设置计时器显示
                     break;
                 default:
                     break;
