@@ -70,6 +70,8 @@ public class MainTab extends Fragment{
     private int kNum=Integer.parseInt( ConfigHelper.getKNum());//k值
     BitmapDescriptor bitmap;//定位图标
     String FPNo="";
+    private String ifIndex=ConfigHelper.getIfIndex();//是否开启索引定位，1-开启 0-关闭
+    
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -365,43 +367,57 @@ public class MainTab extends Fragment{
         	Rssi.put(list.get(i).BSSID, (double)list.get(i).level);
     	}
         fingermodel testData = new fingermodel(0,0,Rssi);//待定位点原型
-		//第一步，查找最近索引值
-        //获取索引表
-    	Cursor cursor = sqliteDatabase.rawQuery("select * from MainIndex ", new String[0]);
-    	//索引目录
-        Map<Integer,Map<String, Double>> indexData=new HashMap<Integer,Map<String, Double>>();
-        while (cursor.moveToNext()) {  
-        	int key = cursor.getInt(cursor.getColumnIndex("IndexNum"));
-        	String mac=cursor.getString(cursor.getColumnIndex("MAC"));
-        	int rssi=cursor.getInt(cursor.getColumnIndex("Rssi"));		        	
-        	if(!indexData.containsKey(key)){
-            	Map<String,Double> list = new HashMap<String,Double>();
-        		list.put(mac, (double)rssi);
-        		indexData.put(key, list);
-        	}
-        	else{
-        		Map<String,Double> newlist=indexData.get(key);
-        		newlist.put(mac, (double)rssi);
-        		indexData.put(key, newlist);
-        	}
-        } 
-
-        kwnn kwnn = new kwnn();
-        int nearestIndex=0;//最近索引值
+        kwnn kwnn = new kwnn();//实例化匹配算法实体对象
+        Cursor cursor;//游标对象
         
-        double minD=0.00;
-        for (Map.Entry<Integer,Map<String, Double>> entry : indexData.entrySet()) {
-        	fingermodel fm=new fingermodel(0,0,entry.getValue());
-        	double d=kwnn.calDistance(testData, fm);
-        	if(minD==0||d<minD){
-        		nearestIndex=entry.getKey();
-        		minD=d;
-        	}
+        if(ifIndex.equals("1")){
+        	//启用索引定位方式
+        	//第一步，查找最近索引值
+            //获取索引表
+        	cursor = sqliteDatabase.rawQuery("select * from MainIndex ", new String[0]);
+        	//索引目录
+            Map<Integer,Map<String, Double>> indexData=new HashMap<Integer,Map<String, Double>>();
+            while (cursor.moveToNext()) {  
+            	int key = cursor.getInt(cursor.getColumnIndex("IndexNum"));
+            	String mac=cursor.getString(cursor.getColumnIndex("MAC"));
+            	int rssi=cursor.getInt(cursor.getColumnIndex("Rssi"));	
+            	
+            	if(!indexData.containsKey(key)){
+                	Map<String,Double> list = new HashMap<String,Double>();
+            		list.put(mac, (double)rssi);
+            		indexData.put(key, list);
+            	}
+            	else{
+            		Map<String,Double> newlist=indexData.get(key);
+            		newlist.put(mac, (double)rssi);
+            		indexData.put(key, newlist);
+            	}
+            } 
+
+            int nearestIndex=0;//最近索引值
+            
+            double minD=0.00;
+            for (Map.Entry<Integer,Map<String, Double>> entry : indexData.entrySet()) {
+            	fingermodel fm=new fingermodel(0,0,entry.getValue());
+            	double d=kwnn.calDistance(testData, fm);
+            	if(minD==0||d<minD){
+            		nearestIndex=entry.getKey();
+            		minD=d;
+            	}
+            }
+            //第二步，匹配索引拿到对应指纹数据
+            cursor = sqliteDatabase.rawQuery("select d.MAC,d.Lat,d.Lng,d.Rssi from FingerIndex f join FingerData d on f.FPId=d.ID where f.IndexNum=? "
+					, new String[]{String.valueOf(nearestIndex)});
         }
+        else{
+        	//第二步，未开启索引查找，则查询所有指纹数据
+        	cursor = sqliteDatabase.rawQuery("select d.MAC,d.Lat,d.Lng,d.Rssi from FingerData d ", new String[0]);
+        }
+		
         
         //第二步，匹配索引拿到对应指纹数据
-        cursor = sqliteDatabase.rawQuery("select d.MAC,d.Lat,d.Lng,d.Rssi from FingerIndex f join FingerData d on f.FPId=d.ID where f.IndexNum=? "
-        						, new String[]{String.valueOf(nearestIndex)});
+//        cursor = sqliteDatabase.rawQuery("select d.MAC,d.Lat,d.Lng,d.Rssi from FingerIndex f join FingerData d on f.FPId=d.ID where f.IndexNum=? "
+//        						, new String[]{String.valueOf(nearestIndex)});
 
     	Map<String, Map<String,Double>> fingerList = new HashMap<String, Map<String,Double>>();
         while (cursor.moveToNext()) { 

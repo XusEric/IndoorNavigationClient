@@ -14,6 +14,7 @@ public class ConfigHelper {
 	static private String _clusterNum = null;
 	static private String _kNum = null;
 	static private String _floor = null;
+	static private String _ifIndex = null;
 	static{
 		loads();
 	}
@@ -25,13 +26,14 @@ public class ConfigHelper {
 			fis = new FileInputStream("/sdcard/config.properties");//属性文件流
 			Properties dbProps = new Properties();
 			dbProps.load(fis);
-			//获取对应参数值
+			//一次性获取对应参数值
 			_dbNameSpace = dbProps.getProperty("NAMESPACE");
 			_dbUrl = dbProps.getProperty("URL");
 			_collectTime = dbProps.getProperty("COLLECTTIME");//采集时长
 			_clusterNum= dbProps.getProperty("CLUSTERNUM");//聚类数
 			_kNum= dbProps.getProperty("KNUM");//k值
 			_floor= dbProps.getProperty("FLOOR");//楼层
+			_ifIndex= dbProps.getProperty("IFINDEX");//是否启用索引
 		}
 		catch (Exception e) {
 			System.err.println("不能读取属性文件. " +"请确保config.properties在指定的路径中");
@@ -94,5 +96,10 @@ public class ConfigHelper {
 		if(_floor==null)
 			loads();
 			return _floor;
+	}
+	public static String getIfIndex() {
+		if(_ifIndex==null)
+			loads();
+			return _ifIndex;
 	}
 }

@@ -14,12 +14,13 @@
         android:paddingLeft="25dp"  
         android:paddingTop="15dp" >  
   
-        <TextView  
-            android:id="@+id/menu_1"  
-            android:layout_width="wrap_content"  
-            android:layout_height="wrap_content"  
-            android:text="@string/setting_tab_finger"  
-            android:textColor="@color/black" />  
+        <TextView
+            android:id="@+id/menu_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/setting_tab_finger"
+            android:textColor="@color/black"
+            android:textSize="18dp" />
             
     </LinearLayout>  
     <View
@@ -38,12 +39,15 @@
 	       android:layout_y="20dip" 
 	       android:layout_x="50dip">
 	       </TextView>
-	   <TextView 
-	       android:layout_width="wrap_content" 
-	       android:text="分类数量:" 
-	       android:layout_height="wrap_content" 
-	       android:layout_y="100dip" 
-	       android:layout_x="55dip">
+
+	   <TextView
+	       android:layout_width="wrap_content"
+	       android:layout_height="wrap_content"
+	       android:layout_x="70dip"
+	       android:layout_y="80dip"
+	       android:text="分类数量:"
+	       android:paddingRight="2dp" >
+
 	       </TextView>
 	       
 	   <EditText
@@ -57,8 +61,8 @@
 	       android:layout_width="100px" 
 	       android:layout_height="wrap_content" 
 	       android:id="@+id/etCluster" 
-	       android:layout_y="90dip" 
-	       android:layout_x="120dip">
+	       android:layout_y="70dip" 
+	       android:layout_x="150dip">
 	       </EditText>
 	</AbsoluteLayout>
 	
@@ -71,11 +75,12 @@
         android:paddingLeft="25dp"  
         android:paddingTop="15dp" >  
   
-        <TextView  
-            android:layout_width="wrap_content"  
-            android:layout_height="wrap_content"  
-            android:text="@string/setting_tab_location"  
-            android:textColor="@color/black" />  
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/setting_tab_location"
+            android:textColor="@color/black" 
+            android:textSize="18dp" />
             
     </LinearLayout>
     
@@ -94,14 +99,14 @@
 	       android:layout_height="wrap_content" 
 	       android:id="@+id/tvName2" 
 	       android:layout_y="20dip" 
-	       android:layout_x="50dip">
+	       android:layout_x="80dip">
 	       </TextView>
 	   <EditText
 	       android:layout_width="100px" 
 	       android:layout_height="wrap_content" 
 	       android:id="@+id/etKNum" 
 	       android:layout_y="10dip" 
-	       android:layout_x="120dip">
+	       android:layout_x="150dip">
 	       </EditText>
 	</AbsoluteLayout>
 	
@@ -112,13 +117,14 @@
         android:orientation="vertical"  
         android:paddingBottom="5dp"  
         android:paddingLeft="25dp"  
-        android:paddingTop="15dp" >  
+        android:paddingTop="15dp">  
   
         <TextView  
             android:layout_width="wrap_content"  
             android:layout_height="wrap_content"  
             android:text="@string/setting_tab_other"  
-            android:textColor="@color/black" />  
+            android:textColor="@color/black"
+            android:textSize="18dp" />  
             
     </LinearLayout>
     
@@ -131,19 +137,33 @@
 	  android:layout_width="wrap_content"
 	  android:layout_height="wrap_content">
 	  
+	   <TextView 
+	       android:layout_width="wrap_content" 
+	       android:text="是否启用索引:" 
+	       android:layout_height="wrap_content" 
+	       android:layout_y="20dip" 
+	       android:layout_x="40dip">
+	       </TextView>
+	   <EditText
+	       android:layout_width="100px" 
+	       android:layout_height="wrap_content" 
+	       android:id="@+id/etIfIndex" 
+	       android:layout_y="10dip" 
+	       android:layout_x="150dip">
+	       </EditText>
 	  <TextView 
 	       android:layout_width="wrap_content" 
 	       android:text="楼层:" 
 	       android:layout_height="wrap_content" 
-	       android:layout_y="20dip" 
-	       android:layout_x="50dip">
+	       android:layout_y="80dip" 
+	       android:layout_x="100dip">
 	       </TextView>
 	   <EditText
 	       android:layout_width="100px" 
 	       android:layout_height="wrap_content" 
 	       android:id="@+id/etFloor" 
-	       android:layout_y="10dip" 
-	       android:layout_x="120dip">
+	       android:layout_y="70dip" 
+	       android:layout_x="150dip">
 	       </EditText>
 	</AbsoluteLayout>
 	<!-- 操作按钮 -->
@@ -153,7 +173,8 @@
         android:layout_height="wrap_content"  
         android:orientation="horizontal" 
         android:layout_gravity="center"  
-        android:paddingTop="15dp" >  
+        android:paddingTop="15dp"
+        android:paddingLeft="55dp"   >  
   
         <Button 
 	       android:layout_width="wrap_content" 
@@ -164,11 +185,12 @@
 	       </Button>
 	       
 	   <Button
-	       android:layout_width="wrap_content" 
-           android:width="150px"
-	       android:text="重置" 
-	       android:layout_height="wrap_content" 
-	       android:id="@+id/btnReset">
+	       android:id="@+id/btnReset"
+	       android:layout_width="wrap_content"
+	       android:layout_height="wrap_content"
+	       android:text="重置"
+	       android:width="150px" >
+
 	       </Button>
     </LinearLayout>  
 	
