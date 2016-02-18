@@ -40,16 +40,6 @@
 	       android:layout_x="50dip">
 	       </TextView>
 
-	   <TextView
-	       android:layout_width="wrap_content"
-	       android:layout_height="wrap_content"
-	       android:layout_x="70dip"
-	       android:layout_y="80dip"
-	       android:text="分类数量:"
-	       android:paddingRight="2dp" >
-
-	       </TextView>
-	       
 	   <EditText
 	       android:layout_width="100px" 
 	       android:layout_height="wrap_content" 
@@ -57,11 +47,35 @@
 	       android:layout_y="10dip" 
 	       android:layout_x="150dip">
 	       </EditText>
+	       
+	   <TextView
+	       android:layout_width="wrap_content"
+	       android:layout_height="wrap_content"
+	       android:layout_y="60dip"
+	       android:layout_x="70dip"
+	       android:text="分类数量:" >
+	       </TextView>
+	       
 	   <EditText
 	       android:layout_width="100px" 
 	       android:layout_height="wrap_content" 
 	       android:id="@+id/etCluster" 
-	       android:layout_y="70dip" 
+	       android:layout_y="50dip" 
+	       android:layout_x="150dip">
+	       </EditText>
+	       
+	   <TextView
+	       android:layout_width="wrap_content"
+	       android:layout_height="wrap_content"
+	       android:layout_y="110dip"
+	       android:layout_x="60dip"
+	       android:text="采集数阀值:" >
+	       </TextView>
+	   <EditText
+	       android:layout_width="100px" 
+	       android:layout_height="wrap_content" 
+	       android:id="@+id/etRssiNum" 
+	       android:layout_y="100dip" 
 	       android:layout_x="150dip">
 	       </EditText>
 	</AbsoluteLayout>
@@ -155,14 +169,14 @@
 	       android:layout_width="wrap_content" 
 	       android:text="楼层:" 
 	       android:layout_height="wrap_content" 
-	       android:layout_y="80dip" 
+	       android:layout_y="60dip" 
 	       android:layout_x="100dip">
 	       </TextView>
 	   <EditText
 	       android:layout_width="100px" 
 	       android:layout_height="wrap_content" 
 	       android:id="@+id/etFloor" 
-	       android:layout_y="70dip" 
+	       android:layout_y="50dip" 
 	       android:layout_x="150dip">
 	       </EditText>
 	</AbsoluteLayout>

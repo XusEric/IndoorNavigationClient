@@ -15,6 +15,7 @@ public class ConfigHelper {
 	static private String _kNum = null;
 	static private String _floor = null;
 	static private String _ifIndex = null;
+	static private String _rssiNum = null;
 	static{
 		loads();
 	}
@@ -34,6 +35,7 @@ public class ConfigHelper {
 			_kNum= dbProps.getProperty("KNUM");//k值
 			_floor= dbProps.getProperty("FLOOR");//楼层
 			_ifIndex= dbProps.getProperty("IFINDEX");//是否启用索引
+			_rssiNum= dbProps.getProperty("RSSINUM");//采集数阀值，用于高斯过滤掉采集数量较少的AP
 		}
 		catch (Exception e) {
 			System.err.println("不能读取属性文件. " +"请确保config.properties在指定的路径中");
@@ -101,5 +103,10 @@ public class ConfigHelper {
 		if(_ifIndex==null)
 			loads();
 			return _ifIndex;
+	}
+	public static String getRssiNum() {
+		if(_rssiNum==null)
+			loads();
+			return _rssiNum;
 	}
 }

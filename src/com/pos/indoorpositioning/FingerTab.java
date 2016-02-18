@@ -68,6 +68,7 @@ public class FingerTab  extends Fragment{
     private Long rateNumber=(long) 1000;//线程延迟时间
     private int maxNumber=Integer.parseInt( ConfigHelper.getCollectTime());//最大采集时间（秒）
     private int clusterNum=Integer.parseInt( ConfigHelper.getClusterNum());//聚类数
+    private int rssiNum=Integer.parseInt( ConfigHelper.getRssiNum());//采集数阀值
     private Date startDate;//采集开始时间
 	private SQLiteDatabase sqliteDatabase=null;//sqlite操作对象
 	List<ScanResult> list; //周边wifi列表
@@ -509,7 +510,7 @@ public class FingerTab  extends Fragment{
     			for(int i=0;i<o.getValue().size();i++){
     				array[i]=o.getValue().get(i);
     			}
-    			if(array.length>10){
+    			if(array.length>rssiNum){
     				//指定总数大于一定值时加入指纹
         			gm.setData(array);
         			double gf=gm.GaussionFilter();
