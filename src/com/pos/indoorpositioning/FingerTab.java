@@ -229,6 +229,7 @@ public class FingerTab  extends Fragment{
         String[] pts=polygon.split(";");
         int color=0xFFFFFF00;
         String Title="";
+        BitmapDescriptor bitmap;
         for(int i=0;i<pts.length&&pts[i]!="";i++){
         	List<LatLng> ptall = new ArrayList<LatLng>();
         	String[] all=pts[i].split(":");
@@ -238,15 +239,20 @@ public class FingerTab  extends Fragment{
 	        	case 1:
 	        		color=0xAAE5F2FF;
 	        		Title="cart";
+	        		bitmap = BitmapDescriptorFactory.fromResource(R.drawable.cart); 
 	        		break;
 	        	case 2:
 	        		color=0xAAffccff;
 	        		Title="服装";
+	        		bitmap = BitmapDescriptorFactory.fromResource(R.drawable.shopping); 
 	        		break;
 	        	case 3:
 	        		color=0xAAe6b3cc;
 	        		Title="餐厅";
+	        		bitmap = BitmapDescriptorFactory.fromResource(R.drawable.restaurant);
 	        		break; 
+	        	default:
+	        		bitmap = BitmapDescriptorFactory.fromResource(R.drawable.cart); 
         	}
         	for(int j=0;j<pt.length&&pt[j]!="";j++){
         		LatLng latlng = new LatLng(Double.parseDouble(pt[j].split(",")[0]), Double.parseDouble(pt[j].split(",")[1]));
@@ -260,14 +266,13 @@ public class FingerTab  extends Fragment{
             //在地图上添加多边形Option，用于显示  
             mBaiduMap.addOverlay(polygonOption);
             //添加标题、说明
-//            BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.drawable.cart); 
-//            LatLng point = new LatLng(Double.parseDouble(attr[1].split(",")[0]), Double.parseDouble(attr[1].split(",")[1])); 
-//	          MarkerOptions options = new MarkerOptions().position(point) 
-//	          .icon(bitmap)
-//	          .title(Title)
-//	          .zIndex(9)  //设置marker所在层级
-//	          .draggable(true);  //设置手势拖拽
-//	        mBaiduMap.addOverlay(options);
+            LatLng point = new LatLng(Double.parseDouble(attr[1].split(",")[0]), Double.parseDouble(attr[1].split(",")[1])); 
+	          MarkerOptions options = new MarkerOptions().position(point) 
+	          .icon(bitmap)
+	          .title(Title)
+	          .zIndex(9)  //设置marker所在层级
+	          .draggable(true);  //设置手势拖拽
+	        mBaiduMap.addOverlay(options);
         } 
         
         mBaiduMap.setOnMapClickListener(new OnMapClickListener() { 
